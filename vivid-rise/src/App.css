@@ -1,0 +1,230 @@
+/* src/App.css - 메인 홈화면 스타일 스펙 반영 */
+:root {
+  --toss-bg-grey: #F2F4F6;
+  --toss-text-black: #191F28;
+  --toss-text-grey: #4E5968;
+  --toss-text-light: #8B95A1;
+  --toss-blue: #3182F6;
+  /* TDS 토큰 (Quick_Navigation 스펙) */
+  --token-tds-color-white: #ffffff;
+  --adaptiveBackground: #ffffff;
+  --token-tds-color-grey-100: #f2f4f6;
+  --adaptiveGrey100: #f2f4f6;
+  --token-tds-color-grey-opacity-50: rgba(0, 23, 51, 0.02);
+  --adaptiveGreyOpacity50: rgba(0, 23, 51, 0.02);
+  --token-tds-color-grey-opacity-200: rgba(0, 27, 55, 0.1);
+  --adaptiveGreyOpacity200: rgba(0, 27, 55, 0.1);
+}
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  background-color: var(--token-tds-color-white, var(--adaptiveBackground));
+  color: var(--toss-text-black);
+}
+.app-container {
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+  min-height: 100vh;
+  height: 100%;
+  padding: 0 20px 20px;
+  box-sizing: border-box;
+  background-color: var(--token-tds-color-white, var(--adaptiveBackground));
+  overflow: visible;
+}
+/* 플로우/선택 화면에서 하단 버튼이 보이도록 패딩 최소화 */
+.app-container:has(.flow-container) {
+  padding-bottom: 0;
+}
+/* 메인 홈화면 프레임: 375 (스펙) */
+.app-container .home-page {
+  max-width: 375px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Safe Area: SDK 값이 있으면 var()로 적용, 없으면 env() fallback (앱인토스 문서 준수) */
+.app-container.use-toss-nav .home-header,
+.app-container.use-toss-nav .confirm-header { display: none !important; }
+.app-container.use-toss-nav .home-page { padding-top: calc(44px + var(--safe-area-inset-top, env(safe-area-inset-top, 0px))); }
+.app-container.use-toss-nav .flow-container { padding-top: calc(44px + var(--safe-area-inset-top, env(safe-area-inset-top, 0px))); }
+.app-container.use-toss-nav .confirm-page { padding-top: calc(44px + var(--safe-area-inset-top, env(safe-area-inset-top, 0px))); }
+.app-container.use-toss-nav .select-page { padding-top: calc(44px + var(--safe-area-inset-top, env(safe-area-inset-top, 0px))); }
+.app-container.use-toss-nav .map-page .map-header { display: none; }
+.app-container.use-toss-nav .map-page .map-container { top: 0; }
+.app-container.use-toss-nav .map-page { padding-top: 0; }
+.app-container.use-toss-nav .map-page .bottom-floating-area { padding-top: 8px; }
+/* Quick_Navigation - Top / IOS - Light: height 44 */
+.header-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  height: 44px;
+  margin-bottom: 12px;
+}
+.header-nav .back-arrow {
+  width: 44px;
+  height: 44px;
+  padding: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  font-size: 20px;
+  color: var(--toss-text-black);
+  cursor: pointer;
+}
+/* Title Area: fit-content, height 34, borderRadius 99 (pill) */
+.header-title {
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--toss-text-black);
+  height: 34px;
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  border-radius: 99px;
+}
+/* Right: Fixed Icon Area - height 34, grey-opacity-50, borderRadius 99, More 44x44, Divider 1x16, Close 44x44 */
+.header-icons {
+  display: flex;
+  align-items: center;
+  height: 34px;
+  padding: 0 4px;
+  background-color: var(--token-tds-color-grey-opacity-50, var(--adaptiveGreyOpacity50));
+  border-radius: 99px;
+  color: rgba(0, 27, 55, 0.6);
+  font-size: 18px;
+  font-weight: 500;
+}
+.header-icons .header-icon-btn {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.header-icons .header-divider {
+  width: 1px;
+  height: 16px;
+  background-color: var(--token-tds-color-grey-opacity-200, var(--adaptiveGreyOpacity200));
+  flex-shrink: 0;
+}
+.section-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--toss-text-black);
+  margin-bottom: 16px;
+  line-height: 1.3;
+}
+/* 패딩 · 마진: 12px */
+.card-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 40px;
+}
+/* Frame 57: grey-100, borderRadius 12, height 100 */
+.toss-card {
+  width: 100%;
+  max-width: 335px;
+  min-height: 100px;
+  background-color: var(--token-tds-color-grey-100, var(--adaptiveGrey100));
+  border-radius: 12px;
+  padding: 24px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  transition: transform 0.1s;
+}
+.toss-card:active { transform: scale(0.98); }
+.card-icon {
+  width: 40px;
+  height: 40px;
+  font-size: 36px;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.card-title {
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--toss-text-grey);
+  margin-bottom: 0;
+}
+.card-desc {
+  font-size: 14px;
+  color: var(--toss-text-light);
+}
+.list-header-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #333D4B;
+  margin-bottom: 10px;
+}
+.ranking-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.list-item {
+  display: flex;
+  align-items: center;
+  padding: 16px 0;
+  border-bottom: 1px solid #F2F2F2;
+}
+.list-icon-box {
+  width: 40px;
+  height: 40px;
+  background-color: var(--toss-bg-grey);
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 20px;
+  margin-right: 16px;
+}
+.list-text-box {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.list-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--toss-text-black);
+}
+.list-sub {
+  font-size: 13px;
+  color: var(--toss-text-light);
+}
+.rank-badge {
+  font-size: 18px;
+  font-weight: bold;
+  color: var(--toss-text-light);
+  flex-shrink: 0;
+  margin-left: 12px;
+}
+/* 4위: 숫자 없이 회색 메달만 (1~3위와 구분된 디자인) */
+.rank-badge-fourth {
+  width: 28px;
+  height: 28px;
+  background: linear-gradient(160deg, #9CA3AF 0%, #6B7280 100%);
+  border-radius: 50%;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.12);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0;
+  color: transparent;
+  margin-left: 12px;
+  flex-shrink: 0;
+}

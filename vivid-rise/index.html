@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <!-- /result 등 경로가 붙어 있으면 즉시 /#/... 로 돌려서 Referer가 항상 localhost:5173/ 로만 나가게 함 -->
+    <script>
+      (function() {
+        var p = location.pathname;
+        if (p !== '/' && p !== '') {
+          location.replace(location.origin + '/' + (location.hash || ''));
+        }
+      })();
+    </script>
+    <meta charset="UTF-8" />
+    <meta name="referrer" content="unsafe-url" />
+    <!-- 앱인토스 비게임 가이드: 핀치줌 비활성화 (지도는 예외로 제한적 허용) -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="theme-color" content="#ffffff" />
+    <meta name="color-scheme" content="light" />
+    <link rel="icon" type="image/png" href="/logo.png" />
+    <link rel="apple-touch-icon" href="/logo.png" />
+    <title>요즘 뭐 함</title>
+    <style>
+      /* 앱인토스: 라이트 모드만 지원 */
+      html { color-scheme: light; }
+      html, body, #root { width: 100%; height: 100%; margin: 0; padding: 0; overflow: hidden; }
+    </style>
+    <!--
+      네이버 지도 JavaScript API v3 (웹용)
+      - 2025.05 기준: ncpKeyId 사용 (ncpClientId는 구버전)
+      - 문서: https://navermaps.github.io/maps.js.ncp/docs/
+      - NCP 콘솔에서 웹 서비스 URL(예: http://localhost:5173, 실서비스 도메인) 등록 필수
+      - 출시 전: ncpKeyId를 본인 NCP 프로젝트 키로 교체하고, 실서비스 URL 등록 필요
+    -->
+    <script type="text/javascript" src="https://openapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=tfdaiuu9rx"></script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

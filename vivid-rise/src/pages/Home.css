@@ -1,0 +1,209 @@
+/* src/pages/Home.css */
+
+/* 전체 페이지 — 모바일에서 하단 버튼이 잘리지 않도록 뷰포트 맞춤 */
+.home-page {
+    background-color: white;
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    padding-top: 100px;
+    box-sizing: border-box; /* padding 포함해 높이 100% → 하단이 뷰포트 밖으로 나가지 않음 */
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  /* ✨ 헤더 영역: 상단 Safe Area 적용 (앱인토스 문서 준수) */
+  .home-header {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 100px;
+    padding-top: calc(44px + var(--safe-area-inset-top, env(safe-area-inset-top, 0px)));
+    padding-left: 16px;
+    padding-right: 16px;
+    padding-bottom: 10px;
+    background-color: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    display: flex;
+    justify-content: space-between;
+    align-items: center; /* 수직 중앙 정렬 */
+    z-index: 100;
+    box-sizing: border-box; /* 패딩 포함 높이 계산 */
+  }
+  
+  .header-center { display: flex; align-items: center; gap: 8px; }
+  .header-logo { width: 28px; height: 28px; object-fit: contain; flex-shrink: 0; }
+  .header-title-text { font-size: 17px; font-weight: 600; color: #191F28; }
+  .header-right { display: flex; gap: 4px; }
+  /* 앱인토스 접근성: 터치 영역 최소 44px */
+  .icon-btn { background: none; border: none; padding: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; min-width: 44px; min-height: 44px; }
+  
+  /* 메인 섹션 */
+  .main-section { padding: 12px 20px 4px 20px; flex-shrink: 0; }
+  .main-title { font-size: 24px; font-weight: 700; color: #191F28; line-height: 1.4; margin-bottom: 24px; margin-top: 10px; }
+  .card-container { display: flex; flex-direction: column; gap: 12px; }
+  
+  /* 카드 버튼 */
+  .big-card {
+    width: 100%; height: 100px;
+    background-color: #F2F4F6;
+    border: none; border-radius: 16px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 4px; cursor: pointer; transition: transform 0.1s;
+  }
+  .big-card:active { transform: scale(0.98); }
+  .big-card-emoji { font-size: 40px; line-height: 1; }
+  .card-text { font-size: 15px; font-weight: 600; color: #4E5968; }
+  
+  /* 찜한 장소 */
+  .favorites-section { padding: 16px 20px; flex-shrink: 0; }
+  .favorites-title { font-size: 18px; font-weight: 700; color: #191F28; margin-bottom: 12px; }
+  .favorites-list { display: flex; flex-direction: column; gap: 10px; }
+  .favorite-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 14px 16px; background: #FFF5F5; border: 1px solid #FFE0E0; border-radius: 14px;
+  }
+  .favorite-emoji { font-size: 28px; flex-shrink: 0; }
+  .favorite-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+  .favorite-name { font-size: 16px; font-weight: 700; color: #191F28; }
+  .favorite-tag { font-size: 13px; color: #8B95A1; }
+  .favorite-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+  .favorite-link {
+    font-size: 13px; font-weight: 600; color: #3182F6; background: none; border: none; cursor: pointer; padding: 6px 0;
+  }
+  .favorite-remove {
+    width: 28px; height: 28px; border-radius: 50%; border: none; background: #F2F4F6;
+    font-size: 14px; color: #8B95A1; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0;
+  }
+  .favorite-remove:hover { background: #E5E8EB; color: #191F28; }
+  
+  /* 랭킹 섹션 */
+  .ranking-section { 
+    padding: 2px 20px 40px 20px; 
+    flex: 1; 
+    overflow-y: auto; 
+    /* 스크롤바 숨기기 */
+    -ms-overflow-style: none; 
+    scrollbar-width: none; 
+  }
+  .ranking-section::-webkit-scrollbar { display: none; }
+  
+  .ranking-title { font-size: 18px; font-weight: 700; color: #191F28; margin-bottom: 16px; }
+  .ranking-list { display: flex; flex-direction: column; }
+  .ranking-item { display: flex; align-items: center; padding: 12px 0; gap: 16px; }
+  .rank-icon-wrapper { width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .bg-grey { background-color: #F2F4F6; }
+  .emoji-icon { font-size: 24px; }
+  .rank-info { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+  .rank-name { font-size: 16px; font-weight: 700; color: #191F28; }
+  .rank-desc { font-size: 13px; color: #8B95A1; }
+  .medal-wrapper { font-size: 24px; }
+  .badge-grey { font-size: 14px; font-weight: 700; color: #8B95A1; background-color: #F2F4F6; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+  
+  /* 선택 흐름 — 뷰포트 안에 하단 버튼이 들어가도록 */
+  .flow-container {
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    background-color: white;
+  }
+  .flow-container > .home-header {
+    flex-shrink: 0;
+  }
+  .flow-content {
+    padding: 24px;
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding-bottom: 24px;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .flow-content::-webkit-scrollbar { display: none; }
+
+  /* 인트로 */
+  .intro-content {
+    flex: 1;
+    min-height: 0;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+  }
+  .text-left { text-align: left; }
+  .flow-title { font-size: 24px; font-weight: 700; color: #191F28; line-height: 1.4; margin-bottom: 8px; }
+  .flow-subtitle { font-size: 16px; color: #8B95A1; margin-bottom: 24px; }
+  /* 375x812 등 모바일 뷰포트에 맞게 아이콘 영역 리사이징 — 잘리지 않도록 */
+  .magnifying-wrapper {
+    flex: 1;
+    min-height: 0;
+    max-height: 50vh;
+    max-height: 50svh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px 0;
+    box-sizing: border-box;
+  }
+  .magnifying-emoji {
+    font-size: clamp(56px, 16vmin, 96px);
+    line-height: 1;
+    display: block;
+  }
+  
+  /* 공통 */
+  .flow-question { font-size: 22px; font-weight: 700; color: #191F28; margin-bottom: 6px; }
+  .flow-desc { font-size: 15px; color: #8B95A1; margin-bottom: 32px; }
+  
+  /* 하단 버튼 — 항상 보이도록 flex로 고정 + safe-area (SDK 값 우선) */
+  .bottom-nav-area {
+    flex-shrink: 0;
+    padding: 12px 24px;
+    padding-bottom: calc(12px + var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)));
+    background-color: white;
+    display: flex;
+    gap: 12px;
+    border-top: 1px solid rgba(0,0,0,0.05);
+  }
+  .two-buttons button { flex: 1; min-height: 52px; height: 52px; border-radius: 16px; font-size: 16px; font-weight: 700; border: none; cursor: pointer; }
+  .btn-prev-half { background-color: #F2F4F6; color: #4E5968; }
+  .btn-next-half { background-color: #3182F6; color: white; }
+  .btn-next-half:disabled { background-color: #E5E8EB; color: #B0B8C1; cursor: not-allowed; }
+  .full-width { width: 100%; min-height: 52px; height: 52px; }
+  .btn-toss-primary { background-color: #3182F6; color: white; border-radius: 16px; font-size: 17px; font-weight: 700; border: none; cursor: pointer; }
+  
+  /* 그리드 & 리스트 */
+  .selection-grid-4 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .selection-grid-list-style { display: flex; flex-direction: column; gap: 12px; }
+  .selection-grid-list-style .grid-select-btn { flex-direction: row; padding: 20px 24px; justify-content: center; }
+  .grid-select-btn { background-color: white; border: 1px solid #E5E8EB; border-radius: 16px; padding: 20px 0; display: flex; flex-direction: column; align-items: center; gap: 8px; cursor: pointer; }
+  .grid-select-btn.selected { background-color: #E8F3FF; border-color: #3182F6; }
+  .grid-emoji { font-size: 28px; }
+  .grid-label { font-size: 15px; font-weight: 600; color: #333D4B; }
+  .grid-select-btn.selected .grid-label { color: #3182F6; }
+  .list-select-container { display: flex; flex-direction: column; gap: 16px; }
+  .list-select-btn { width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 20px 0; border: none; border-bottom: 1px solid #F2F4F6; background: none; cursor: pointer; }
+  .list-left { display: flex; align-items: center; gap: 10px; }
+  .list-icon { font-size: 20px; }
+  .list-label { font-size: 17px; color: #333D4B; font-weight: 500; }
+  .list-select-btn.selected .list-label { color: #3182F6; font-weight: 700; }
+  
+  /* 진행바 (헤더 아래 위치) */
+  .progress-bar-bg { width: 100%; height: 4px; background-color: #F2F4F6; position: absolute; top: 100px; /* 헤더 높이만큼 아래로 */ left: 0; right: 0; z-index: 90; }
+  .progress-bar-fill { height: 100%; background-color: #3182F6; transition: width 0.3s; }
+  
+  /* 종합 & 로딩 */
+  .summary-content { padding: 24px; flex: 1; }
+  .summary-card { background-color: #F2F4F6; border-radius: 24px; padding: 24px; display: flex; flex-direction: column; gap: 24px; margin-top: 30px; }
+  .summary-item { display: flex; gap: 16px; align-items: flex-start; }
+  .summary-icon-box { width: 40px; height: 40px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+  .summary-text-box { display: flex; flex-direction: column; gap: 2px; padding-top: 2px; }
+  .summary-label { font-size: 13px; font-weight: 700; color: #333D4B; }
+  .summary-value { font-size: 15px; color: #6B7684; }
+  .loading-container { align-items: center; text-align: left; }
+  .loading-content { width: 100%; padding: 24px; margin-top: 60px; }
+  .loading-circle { width: 60px; height: 60px; border: 4px solid #F2F4F6; border-top: 4px solid #3182F6; border-radius: 50%; margin-top: 60px; animation: spin 1s linear infinite; }
+  @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }

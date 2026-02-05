@@ -1,0 +1,12 @@
+# Project Vision
+우리는 단순한 지도가 아니라, '혼밥 난이도' 독점 데이터를 자산화하여 결정 장애를 해결하는 플랫폼 'Vivid Rise'입니다.
+
+# Key Features
+- 독점 데이터: solo_difficulty_level (1~5), solo_welcome_time
+- 타겟: 트렌드에 민감한 2030 혼밥족, MZ세대
+- 디자인 철학: 7년 차 디자이너의 감각이 반영된 Glassmorphism (Blur, Translucency), 토스(Toss) 앱 스타일의 미니멀리즘
+
+# Tech Stack
+- Frontend: Next.js 14 (App Router), Tailwind CSS, Framer Motion
+- Backend: Supabase
+- Map: Naver Map API

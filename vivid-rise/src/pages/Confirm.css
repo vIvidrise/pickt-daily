@@ -1,0 +1,135 @@
+/* src/pages/Confirm.css - 선택 요약 확인 화면 */
+.confirm-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  padding: 0 24px 24px;
+  box-sizing: border-box;
+  background: #fff;
+}
+
+.confirm-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 56px;
+  margin-bottom: 12px;
+}
+
+.confirm-back {
+  background: none;
+  border: none;
+  font-size: 20px;
+  color: var(--toss-text-black);
+  cursor: pointer;
+  padding: 8px;
+}
+
+.confirm-header-center {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.confirm-header-logo {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+.confirm-header-title {
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--toss-text-black);
+}
+
+.confirm-header-icons {
+  display: flex;
+  gap: 16px;
+  color: #8B95A1;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.confirm-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--toss-text-black);
+  margin: 0 0 28px 0;
+  line-height: 1.35;
+}
+
+.confirm-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  flex: 1;
+}
+
+.confirm-list-row {
+  display: flex;
+  align-items: center;
+  padding: 20px 0;
+  border-bottom: 1px solid #F2F4F6;
+  gap: 16px;
+}
+
+.confirm-list-row:last-child {
+  border-bottom: none;
+}
+
+.confirm-row-icon {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--toss-bg-grey);
+  border-radius: 12px;
+  font-size: 24px;
+  flex-shrink: 0;
+}
+
+.confirm-row-texts {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.confirm-row-top {
+  font-size: 15px;
+  font-weight: 700;
+  color: #333D4B;
+}
+
+.confirm-row-bottom {
+  font-size: 15px;
+  font-weight: 400;
+  color: #8B95A1;
+}
+
+.confirm-footer {
+  margin-top: auto;
+  padding-top: 24px;
+}
+
+.confirm-cta {
+  width: 100%;
+  height: 56px;
+  background-color: var(--toss-blue);
+  color: white;
+  border: none;
+  border-radius: 16px;
+  font-size: 17px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(49, 130, 246, 0.3);
+  transition: opacity 0.2s;
+}
+
+.confirm-cta:hover {
+  opacity: 0.95;
+}
+
+.confirm-cta:active {
+  opacity: 0.9;
+}

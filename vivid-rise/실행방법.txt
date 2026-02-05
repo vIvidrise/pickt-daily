@@ -1,0 +1,18 @@
+[요즘 뭐 함] 앱 실행 방법
+========================
+
+1. 이 파일이 있는 폴더가 맞습니다.
+   (vivid-rise 폴더 - index.html, vite.config.js 가 있는 곳)
+
+2. 터미널을 열고 아래를 그대로 실행하세요:
+
+   cd /Users/ad/Desktop/pickt-daily/vivid-rise
+   npm run dev
+
+3. 브라우저에서 주소 입력:
+
+   http://localhost:5173
+
+※ 주의: vivid-rise 안에 있는 또 다른 vivid-rise 폴더에서 실행하면
+  Next.js(3000번)가 켜져서 이 앱이 안 열립니다.
+  반드시 index.html 이 있는 이 폴더에서 실행하세요.

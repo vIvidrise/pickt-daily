@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#e8eef5"/>
+      <stop offset="100%" style="stop-color:#d0dae5"/>
+    </linearGradient>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(0,0,0,0.06)" stroke-width="0.5"/>
+    </pattern>
+  </defs>
+  <rect width="800" height="600" fill="url(#bg)"/>
+  <rect width="800" height="600" fill="url(#grid)"/>
+  <!-- 간단한 지도 형태 (서울 근처 한강 등) -->
+  <path d="M 100 200 Q 200 150 350 180 T 600 220 T 750 280 L 720 450 Q 400 420 200 380 Q 80 350 100 200 Z" fill="rgba(200,210,220,0.5)" stroke="rgba(0,0,0,0.08)" stroke-width="1"/>
+  <text x="400" y="320" text-anchor="middle" font-size="14" fill="#8B95A1" font-family="system-ui,sans-serif">지도 영역</text>
+</svg>
