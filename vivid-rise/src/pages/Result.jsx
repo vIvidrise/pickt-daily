@@ -14,6 +14,29 @@ import "./Result.css";
 /** 지도 핀 안에 넣을 카테고리 아이콘 (오늘 뭐 먹지: 음식 이모지, 오늘 뭐 하지: 활동 이모지) */
 const getPinEmoji = (item) => item?.emoji || '📍';
 
+/** 혼밥 랭킹 단계 → 핀 인라인 스타일 (iframe 내부에서도 적용되도록) */
+const getPinLevelStyle = (level) => {
+  const l = Math.min(5, Math.max(1, Number(level) || 1));
+  const colors = {
+    1: { bg: '#22C55E', shadow: '0 4px 10px rgba(34,197,94,0.4)' },
+    2: { bg: '#22C55E', shadow: '0 4px 10px rgba(34,197,94,0.4)' },
+    3: { bg: '#EAB308', shadow: '0 4px 10px rgba(234,179,8,0.4)' },
+    4: { bg: '#F04452', shadow: '0 4px 10px rgba(240,68,82,0.4)' },
+    5: { bg: '#3B82F6', shadow: '0 4px 10px rgba(59,130,246,0.4)' },
+  };
+  const c = colors[l] || colors[4];
+  return `background-color:${c.bg};box-shadow:${c.shadow};border:3px solid white;`;
+};
+
+/** Leaflet용: 혼밥 랭킹 단계 → 핀 색상 클래스 (같은 문서라 CSS 적용됨) */
+const getPinLevelClass = (level) => {
+  const l = Math.min(5, Math.max(1, Number(level) || 1));
+  if (l <= 2) return 'pin-level-12';
+  if (l === 3) return 'pin-level-3';
+  if (l === 4) return 'pin-level-4';
+  return 'pin-level-5';
+};
+
 // Leaflet 기본 마커 아이콘 경로 이슈(Vite) 방지
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -105,11 +128,12 @@ export default function Result() {
             if (item.lat == null || lng == null) return;
 
             const emoji = getPinEmoji(item);
+            const levelStyle = !isDoMode ? getPinLevelStyle(item.solo_difficulty_level) : 'background-color:#F04452;box-shadow:0 4px 10px rgba(240,68,82,0.4);border:3px solid white;';
             const contentHtml = `
               <div class="custom-pin-container">
                 <div class="map-pin-wrapper">
-                  <div class="pin-shape"><span class="pin-emoji">${emoji}</span></div>
-                  <div class="pin-shadow"></div>
+                  <div class="pin-shape" style="width:40px;height:40px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);display:flex;align-items:center;justify-content:center;${levelStyle}"><span class="pin-emoji" style="transform:rotate(45deg);font-size:20px;line-height:1;display:block">${emoji}</span></div>
+                  <div class="pin-shadow" style="width:12px;height:4px;background:rgba(0,0,0,0.2);border-radius:50%;margin-top:5px;filter:blur(2px)"></div>
                 </div>
               </div>`;
 
@@ -168,10 +192,11 @@ export default function Result() {
       const lng = item.lng ?? item.left;
       if (item.lat == null || lng == null) return;
       const emoji = getPinEmoji(item);
+      const levelClass = !isDoMode ? getPinLevelClass(item.solo_difficulty_level) : '';
       const pinHtml = `
         <div class="custom-pin-container leaflet-pin">
           <div class="map-pin-wrapper">
-            <div class="pin-shape"><span class="pin-emoji">${emoji}</span></div>
+            <div class="pin-shape ${levelClass}"><span class="pin-emoji">${emoji}</span></div>
             <div class="pin-shadow"></div>
           </div>
         </div>`;
@@ -213,7 +238,19 @@ export default function Result() {
           <div className="leaflet-badge">OpenStreetMap</div>
         </>
       ) : (
-        <div ref={mapElement} className="map-container"></div>
+        <>
+          <div ref={mapElement} className="map-container"></div>
+          {/* 혼밥 랭킹 범례 (오늘 뭐 먹지 결과일 때만) */}
+          {!isDoMode && list.length > 0 && (
+            <div className="map-legend" aria-label="혼밥 랭킹">
+              <div className="map-legend-title">혼밥 랭킹</div>
+              <div className="map-legend-row"><span className="map-legend-dot pin-legend-12" /> 1~2단계</div>
+              <div className="map-legend-row"><span className="map-legend-dot pin-legend-3" /> 3단계</div>
+              <div className="map-legend-row"><span className="map-legend-dot pin-legend-4" /> 4단계</div>
+              <div className="map-legend-row"><span className="map-legend-dot pin-legend-5" /> 5단계</div>
+            </div>
+          )}
+        </>
       )}
 
       {/* 헤더 (이모지 버전) */}

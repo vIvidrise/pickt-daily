@@ -265,6 +265,8 @@ export async function fetchRecommendations(params) {
     const naverUrl = `https://m.place.naver.com/place/list?query=${encodeURIComponent(naverSearchQuery)}`;
 
     const representativeMenu = mode === 'eat' ? pickRepresentativeMenu(category) : '';
+    // 혼밥 랭킹 1~5단계 (eat 모드에서 핀 색상용)
+    const solo_difficulty_level = mode === 'eat' ? Math.min(5, Math.max(1, index + 1 + Math.floor(Math.random() * 2))) : 1;
 
     return {
       id: index + 1,
@@ -281,7 +283,8 @@ export async function fetchRecommendations(params) {
       address,
       time: ["12:00", "15:00", "18:00"][index],
       tag: category,
-      representativeMenu
+      representativeMenu,
+      solo_difficulty_level
     };
   });
 

@@ -174,6 +174,16 @@
     transition: all 0.2s ease;
   }
   
+  /* 혼밥 랭킹별 핀 색상: 1~2 초록, 3 노랑, 4 빨강, 5 파랑 */
+  .pin-shape.pin-level-12 { background-color: #22C55E; box-shadow: 0 4px 10px rgba(34, 197, 94, 0.4); }
+  .pin-shape.pin-level-12.active-pin { background-color: #16A34A; }
+  .pin-shape.pin-level-3 { background-color: #EAB308; box-shadow: 0 4px 10px rgba(234, 179, 8, 0.4); }
+  .pin-shape.pin-level-3.active-pin { background-color: #CA8A04; }
+  .pin-shape.pin-level-4 { background-color: #F04452; box-shadow: 0 4px 10px rgba(240, 68, 82, 0.4); }
+  .pin-shape.pin-level-4.active-pin { background-color: #E23442; }
+  .pin-shape.pin-level-5 { background-color: #3B82F6; box-shadow: 0 4px 10px rgba(59, 130, 246, 0.4); }
+  .pin-shape.pin-level-5.active-pin { background-color: #2563EB; }
+
   /* 핀 선택됐을 때 커짐 */
   .active-pin {
     background-color: #E23442;
@@ -219,6 +229,47 @@
     margin-top: 5px;
     filter: blur(2px);
   }
+
+  /* 지도 왼쪽 위 혼밥 랭킹 범례 */
+  .map-legend {
+    position: absolute;
+    top: 108px;
+    left: 12px;
+    z-index: 15;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(6px);
+    border-radius: 12px;
+    padding: 10px 12px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+    font-size: 12px;
+    color: #374151;
+    line-height: 1.5;
+  }
+  .map-legend-title {
+    font-weight: 700;
+    margin-bottom: 6px;
+    font-size: 13px;
+    color: #111827;
+  }
+  .map-legend-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 2px;
+  }
+  .map-legend-row:last-child { margin-bottom: 0; }
+  .map-legend-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    border: 2px solid white;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  }
+  .pin-legend-12 { background-color: #22C55E; }
+  .pin-legend-3 { background-color: #EAB308; }
+  .pin-legend-4 { background-color: #F04452; }
+  .pin-legend-5 { background-color: #3B82F6; }
   
   /* =========================================
      3. 상단 헤더 & 하단 버튼

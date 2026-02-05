@@ -63,24 +63,6 @@ export default function Saved() {
     if (result.ok) setList((prev) => prev.filter((i) => i.id !== item.id));
   };
 
-  if (!isSupabaseConfigured()) {
-    return (
-      <div className="page saved-page">
-        <div className="saved-header">
-          <button type="button" className="icon-btn" onClick={() => navigate(-1)} aria-label="뒤로가기">
-            ←
-          </button>
-          <span className="saved-header-title">나만의 리스트</span>
-          <div className="header-spacer" />
-        </div>
-        <div className="saved-empty-message">
-          <p>Supabase가 설정되지 않았어요.</p>
-          <p className="saved-empty-desc">.env에 VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY를 추가해 주세요.</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="page saved-page">
       <div className="saved-header">
@@ -137,7 +119,12 @@ export default function Saved() {
         {/* 저장한 메뉴 (Supabase) */}
         <section className="saved-section">
           <h2 className="saved-section-title">저장한 메뉴</h2>
-          {loading ? (
+          {!isSupabaseConfigured() ? (
+            <div className="saved-empty-message saved-empty-inline">
+              <p>Supabase가 설정되지 않았어요.</p>
+              <p className="saved-empty-desc">.env에 VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY를 추가하면 저장한 메뉴를 불러올 수 있어요.</p>
+            </div>
+          ) : loading ? (
             <div className="saved-loading">불러오는 중…</div>
           ) : list.length === 0 ? (
             <div className="saved-empty-message saved-empty-inline">
