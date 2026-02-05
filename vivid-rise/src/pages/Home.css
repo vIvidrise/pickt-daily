@@ -7,11 +7,25 @@
     height: 100%;
     min-height: 0;
     padding-top: 100px;
-    box-sizing: border-box; /* padding 포함해 높이 100% → 하단이 뷰포트 밖으로 나가지 않음 */
+    box-sizing: border-box;
     display: flex;
     flex-direction: column;
     position: relative;
     overflow: hidden;
+  }
+
+  /* 홈 화면(HOME)일 때만 전체 스크롤 가능 — 찜한 장소·랭킹까지 밑으로 내려가게 */
+  .home-page .home-scroll-wrap {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .home-page .home-scroll-wrap::-webkit-scrollbar {
+    display: none;
   }
   
   /* ✨ 헤더 영역: 상단 Safe Area 적용 (앱인토스 문서 준수) */
@@ -39,8 +53,8 @@
   /* 앱인토스 접근성: 터치 영역 최소 44px */
   .icon-btn { background: none; border: none; padding: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; min-width: 44px; min-height: 44px; }
   
-  /* 메인 섹션 */
-  .main-section { padding: 12px 20px 4px 20px; flex-shrink: 0; }
+  /* 메인 섹션 (스크롤 영역 안) */
+  .home-scroll-wrap .main-section { padding: 12px 20px 4px 20px; }
   .main-title { font-size: 24px; font-weight: 700; color: #191F28; line-height: 1.4; margin-bottom: 24px; margin-top: 10px; }
   .card-container { display: flex; flex-direction: column; gap: 12px; }
   
@@ -56,8 +70,8 @@
   .big-card-emoji { font-size: 40px; line-height: 1; }
   .card-text { font-size: 15px; font-weight: 600; color: #4E5968; }
   
-  /* 찜한 장소 */
-  .favorites-section { padding: 16px 20px; flex-shrink: 0; }
+  /* 찜한 장소 (스크롤 영역 안) */
+  .home-scroll-wrap .favorites-section { padding: 16px 20px; }
   .favorites-title { font-size: 18px; font-weight: 700; color: #191F28; margin-bottom: 12px; }
   .favorites-list { display: flex; flex-direction: column; gap: 10px; }
   .favorite-item {
@@ -78,16 +92,10 @@
   }
   .favorite-remove:hover { background: #E5E8EB; color: #191F28; }
   
-  /* 랭킹 섹션 */
-  .ranking-section { 
+  /* 랭킹 섹션 (스크롤 영역 안 — 전체 스크롤로 같이 내려감) */
+  .home-scroll-wrap .ranking-section { 
     padding: 2px 20px 40px 20px; 
-    flex: 1; 
-    overflow-y: auto; 
-    /* 스크롤바 숨기기 */
-    -ms-overflow-style: none; 
-    scrollbar-width: none; 
   }
-  .ranking-section::-webkit-scrollbar { display: none; }
   
   .ranking-title { font-size: 18px; font-weight: 700; color: #191F28; margin-bottom: 16px; }
   .ranking-list { display: flex; flex-direction: column; }

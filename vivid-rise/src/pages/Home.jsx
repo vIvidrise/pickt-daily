@@ -108,58 +108,60 @@ export default function Home() {
   return (
     <div className="page home-page">
       
-      {/* 1. 홈 화면 */}
+      {/* 1. 홈 화면 — 전체 스크롤로 찜한 장소·랭킹까지 밑으로 내려가게 */}
       {currentScreen === 'HOME' && (
         <>
           <Header onBack={()=>{}} hideBack onClose={() => closeView(() => navigate("/"))} />
-          <div className="main-section">
-            <h1 className="main-title">남들은<br />뭘 선택했을까?</h1>
-            <div className="card-container">
-              <button className="big-card" onClick={() => startFlow('eat')}>
-                <span className="big-card-emoji">🍛</span>
-                <span className="card-text">오늘 뭐 먹지</span>
-              </button>
-              <button className="big-card" onClick={() => startFlow('do')}>
-                <span className="big-card-emoji">🏖️</span>
-                <span className="card-text">오늘 뭐 하지</span>
-              </button>
-              <button className="big-card" onClick={() => navigate("/saved")}>
-                <span className="big-card-emoji">📋</span>
-                <span className="card-text">나만의 리스트</span>
-              </button>
-            </div>
-          </div>
-          {favorites.length > 0 && (
-            <div className="favorites-section">
-              <h2 className="favorites-title">❤️ 찜한 장소</h2>
-              <div className="favorites-list">
-                {favorites.map((item, i) => (
-                  <div key={`${item.name}-${i}`} className="favorite-item">
-                    <span className="favorite-emoji">{item.emoji}</span>
-                    <div className="favorite-info">
-                      <span className="favorite-name">{item.name}</span>
-                      {item.tag && <span className="favorite-tag">{item.tag}</span>}
-                    </div>
-                    <div className="favorite-actions">
-                      <button type="button" className="favorite-link" onClick={() => openExternalUrl(item.naverUrl)}>
-                        네이버에서 보기
-                      </button>
-                      <button type="button" className="favorite-remove" onClick={() => { removeFavorite(item).then(() => setFavorites(getFavorites())); }} aria-label="찜 해제">
-                        ✕
-                      </button>
-                    </div>
-                  </div>
-                ))}
+          <div className="home-scroll-wrap">
+            <div className="main-section">
+              <h1 className="main-title">남들은<br />뭘 선택했을까?</h1>
+              <div className="card-container">
+                <button className="big-card" onClick={() => startFlow('eat')}>
+                  <span className="big-card-emoji">🍛</span>
+                  <span className="card-text">오늘 뭐 먹지</span>
+                </button>
+                <button className="big-card" onClick={() => startFlow('do')}>
+                  <span className="big-card-emoji">🏖️</span>
+                  <span className="card-text">오늘 뭐 하지</span>
+                </button>
+                <button className="big-card" onClick={() => navigate("/saved")}>
+                  <span className="big-card-emoji">📋</span>
+                  <span className="card-text">나만의 리스트</span>
+                </button>
               </div>
             </div>
-          )}
-          <div className="ranking-section">
-            <h2 className="ranking-title">지금 뜨는 실시간 랭킹🔥</h2>
-            <div className="ranking-list">
-              <RankingItem icon="🥘" name="마라 로제 떡볶이" desc="강남구 20대 결제 횟수 1위" medal="🥇" />
-              <RankingItem icon="🍲" name="뜨끈한 순대국밥" desc="주문량 300% 급증" medal="🥈" />
-              <RankingItem icon="☕" name="스타벅스 아메리카노" desc="식후 국룰!" medal="🥉" />
-              <RankingItem icon="🍕" name="베이컨 포테이토 피자" desc="회식 메뉴로 인기" medal="4" isBadge />
+            {favorites.length > 0 && (
+              <div className="favorites-section">
+                <h2 className="favorites-title">❤️ 찜한 장소</h2>
+                <div className="favorites-list">
+                  {favorites.map((item, i) => (
+                    <div key={`${item.name}-${i}`} className="favorite-item">
+                      <span className="favorite-emoji">{item.emoji}</span>
+                      <div className="favorite-info">
+                        <span className="favorite-name">{item.name}</span>
+                        {item.tag && <span className="favorite-tag">{item.tag}</span>}
+                      </div>
+                      <div className="favorite-actions">
+                        <button type="button" className="favorite-link" onClick={() => openExternalUrl(item.naverUrl)}>
+                          네이버에서 보기
+                        </button>
+                        <button type="button" className="favorite-remove" onClick={() => { removeFavorite(item).then(() => setFavorites(getFavorites())); }} aria-label="찜 해제">
+                          ✕
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            <div className="ranking-section">
+              <h2 className="ranking-title">지금 뜨는 실시간 랭킹🔥</h2>
+              <div className="ranking-list">
+                <RankingItem icon="🥘" name="마라 로제 떡볶이" desc="강남구 20대 결제 횟수 1위" medal="🥇" />
+                <RankingItem icon="🍲" name="뜨끈한 순대국밥" desc="주문량 300% 급증" medal="🥈" />
+                <RankingItem icon="☕" name="스타벅스 아메리카노" desc="식후 국룰!" medal="🥉" />
+                <RankingItem icon="🍕" name="베이컨 포테이토 피자" desc="회식 메뉴로 인기" medal="4" isBadge />
+              </div>
             </div>
           </div>
         </>
