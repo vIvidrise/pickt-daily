@@ -5,6 +5,8 @@ import Select from "./pages/Select";
 import Confirm from "./pages/Confirm";
 import Result from "./pages/Result";
 import Saved from "./pages/Saved";
+import Fortune from "./pages/Fortune";
+import FortuneResult from "./pages/FortuneResult";
 import { isAppsInTossEnv } from "./utils/appsInTossNav";
 import { getSafeAreaInsets, subscribeSafeArea, applySafeAreaToRoot } from "./utils/safeArea";
 import { subscribeBackEvent, subscribeEntryMessageExited } from "./utils/appsInTossSdk";
@@ -59,6 +61,8 @@ function App() {
             <Route path="/confirm" element={<Confirm />} />
             <Route path="/result" element={<Result />} />
             <Route path="/saved" element={<Saved />} />
+            <Route path="/fortune" element={<Fortune />} />
+            <Route path="/fortune/result" element={<FortuneResult />} />
           </Routes>
         </TossEventSubscriber>
       </div>

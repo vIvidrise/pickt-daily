@@ -24,14 +24,7 @@
       html { color-scheme: light; }
       html, body, #root { width: 100%; height: 100%; margin: 0; padding: 0; overflow: hidden; }
     </style>
-    <!--
-      네이버 지도 JavaScript API v3 (웹용)
-      - 2025.05 기준: ncpKeyId 사용 (ncpClientId는 구버전)
-      - 문서: https://navermaps.github.io/maps.js.ncp/docs/
-      - NCP 콘솔에서 웹 서비스 URL(예: http://localhost:5173, 실서비스 도메인) 등록 필수
-      - 출시 전: ncpKeyId를 본인 NCP 프로젝트 키로 교체하고, 실서비스 URL 등록 필요
-    -->
-    <script type="text/javascript" src="https://openapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=tfdaiuu9rx"></script>
+    <!-- 네이버 지도: Result 페이지에서 loadNaverMapScript()로 로드 (naverMapLoader.js). NCP 웹 서비스 URL에 실서비스 도메인 등록 필수 -->
   </head>
   <body>
     <div id="root"></div>

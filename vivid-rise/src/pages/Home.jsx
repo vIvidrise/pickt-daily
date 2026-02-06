@@ -5,6 +5,44 @@ import { getFavorites, removeFavorite, loadFavoritesCache } from "../utils/favor
 import { closeView, openExternalUrl } from "../utils/appsInTossSdk.js";
 import "./Home.css";
 
+/** ranking_type: solo_master | quick_lunch | solo_night (API 파라미터용) */
+export const RANKING_TYPE = { SOLO_MASTER: 'solo_master', QUICK_LUNCH: 'quick_lunch', SOLO_NIGHT: 'solo_night' };
+
+/** solo_difficulty_level(1~5) → 힙한 태그 텍스트 */
+export function getSoloLevelTag(level) {
+  const l = Math.min(5, Math.max(1, Number(level) || 1));
+  const tags = {
+    1: '혼밥 입문자 성지 🍵',
+    2: '혼밥 성장기 🥢',
+    3: '당당한 혼밥러 전용 🍚',
+    4: '혼밥 마스터 직행 🍜',
+    5: '혼밥 끝판왕 도전 🥩',
+  };
+  return tags[l] || tags[1];
+}
+
+/** 홈 취향존중·혼밥중 목데이터 (ranking_type별) — API 연동 시 ranking_type 파라미터로 교체 */
+const RANKING_ITEMS_BY_TYPE = {
+  [RANKING_TYPE.SOLO_MASTER]: [
+    { icon: '🥘', name: '마라 로제 떡볶이', desc: '혼밥 난이도 높은 곳 정복 1위', solo_difficulty_level: 5 },
+    { icon: '🍲', name: '뜨끈한 순대국밥', desc: '난이도 높은 혼밥 성공', solo_difficulty_level: 4 },
+    { icon: '☕', name: '스타벅스 아메리카노', desc: '당당한 혼밥러 전용', solo_difficulty_level: 3 },
+    { icon: '🍕', name: '베이컨 포테이토 피자', desc: '혼밥 입문자 성지', solo_difficulty_level: 1 },
+  ],
+  [RANKING_TYPE.QUICK_LUNCH]: [
+    { icon: '🍚', name: '한식뷔페 강남점', desc: '점심 회전율 1위', solo_difficulty_level: 2 },
+    { icon: '🍜', name: '맛있는 라멘', desc: '12시 회전율 인기', solo_difficulty_level: 2 },
+    { icon: '🥗', name: '샐러드바', desc: '혼밥 지수 1~2단계 인기', solo_difficulty_level: 1 },
+    { icon: '🍱', name: '도시락 전문점', desc: '점심시간 회전율 좋음', solo_difficulty_level: 2 },
+  ],
+  [RANKING_TYPE.SOLO_NIGHT]: [
+    { icon: '🍺', name: '혼술 환영 포차', desc: '혼술 태그 인기 1위', solo_difficulty_level: 3 },
+    { icon: '🥃', name: '위스키바 A', desc: '혼술 환영 장소', solo_difficulty_level: 4 },
+    { icon: '🍶', name: '이자카야 B', desc: '혼술 태그 인기', solo_difficulty_level: 2 },
+    { icon: '🍷', name: '와인바 C', desc: '혼술 환영', solo_difficulty_level: 5 },
+  ],
+};
+
 export default function Home() {
   const navigate = useNavigate();
 
@@ -18,6 +56,7 @@ export default function Home() {
     companion: '', mood: '', budget: '' // DO
   });
   const [favorites, setFavorites] = useState([]);
+  const [rankingType, setRankingType] = useState(RANKING_TYPE.SOLO_MASTER);
 
   useEffect(() => {
     if (currentScreen === 'HOME') {
@@ -129,6 +168,12 @@ export default function Home() {
                   <span className="card-text">나만의 리스트</span>
                 </button>
               </div>
+              {/* 오늘 내 운세 배너 — 클릭 시 입력 페이지로 이동 */}
+              <section className="fortune-banner-section" aria-label="오늘 내 운세">
+                <button type="button" className="fortune-banner-btn" onClick={() => navigate("/fortune")}>
+                  <img src="/fortune-banner.png" alt="오늘 내 운세 - 오늘의 운세를 확인해 보세요" className="fortune-banner-img" />
+                </button>
+              </section>
             </div>
             {favorites.length > 0 && (
               <div className="favorites-section">
@@ -155,12 +200,24 @@ export default function Home() {
               </div>
             )}
             <div className="ranking-section">
-              <h2 className="ranking-title">지금 뜨는 실시간 랭킹🔥</h2>
+              <h2 className="ranking-title">취향존중, 혼밥중</h2>
+              <p className="ranking-subtitle">테마별 혼밥 랭킹</p>
+              <div className="ranking-tabs">
+                <button type="button" className={`ranking-tab ${rankingType === RANKING_TYPE.SOLO_MASTER ? 'active' : ''}`} aria-pressed={rankingType === RANKING_TYPE.SOLO_MASTER} onClick={() => setRankingType(RANKING_TYPE.SOLO_MASTER)}>혼밥 정복</button>
+                <button type="button" className={`ranking-tab ${rankingType === RANKING_TYPE.QUICK_LUNCH ? 'active' : ''}`} aria-pressed={rankingType === RANKING_TYPE.QUICK_LUNCH} onClick={() => setRankingType(RANKING_TYPE.QUICK_LUNCH)}>점심 회전율</button>
+                <button type="button" className={`ranking-tab ${rankingType === RANKING_TYPE.SOLO_NIGHT ? 'active' : ''}`} aria-pressed={rankingType === RANKING_TYPE.SOLO_NIGHT} onClick={() => setRankingType(RANKING_TYPE.SOLO_NIGHT)}>혼술 환영</button>
+              </div>
               <div className="ranking-list">
-                <RankingItem icon="🥘" name="마라 로제 떡볶이" desc="강남구 20대 결제 횟수 1위" medal="🥇" />
-                <RankingItem icon="🍲" name="뜨끈한 순대국밥" desc="주문량 300% 급증" medal="🥈" />
-                <RankingItem icon="☕" name="스타벅스 아메리카노" desc="식후 국룰!" medal="🥉" />
-                <RankingItem icon="🍕" name="베이컨 포테이토 피자" desc="회식 메뉴로 인기" medal="4" isBadge />
+                {(RANKING_ITEMS_BY_TYPE[rankingType] || RANKING_ITEMS_BY_TYPE[RANKING_TYPE.SOLO_MASTER]).slice(0, 3).map((item, i) => (
+                  <RankingItem
+                    key={item.name + i}
+                    icon={item.icon}
+                    name={item.name}
+                    desc={item.desc}
+                    medal={['🥇', '🥈', '🥉'][i]}
+                    soloLevel={item.solo_difficulty_level}
+                  />
+                ))}
               </div>
             </div>
           </div>
@@ -300,10 +357,16 @@ const SummaryItem = ({ label, value, icon }) => (
      <div className="summary-text-box"><div className="summary-label">{label}</div><div className="summary-value">{value}</div></div>
   </div>
 );
-const RankingItem = ({ icon, name, desc, medal, isBadge }) => (
+const RankingItem = ({ icon, name, desc, medal, isBadge, soloLevel }) => (
   <div className="ranking-item">
     <div className="rank-icon-wrapper bg-grey"><span className="emoji-icon">{icon}</span></div>
-    <div className="rank-info"><div className="rank-name">{name}</div><div className="rank-desc">{desc}</div></div>
+    <div className="rank-info">
+      <div className="rank-name">{name}</div>
+      {soloLevel != null && (
+        <span className="rank-solo-tag">{getSoloLevelTag(soloLevel)}</span>
+      )}
+      <div className="rank-desc">{desc}</div>
+    </div>
     <div className={isBadge ? "medal-wrapper badge-grey" : "medal-wrapper"}>{medal}</div>
   </div>
 );

@@ -6,6 +6,7 @@ import { fetchRecommendations } from "../api/gemini.js";
 import { isFavorited, addFavorite, removeFavorite, getFavorites } from "../utils/favorites.js";
 import { isAppsInTossEnv, addAccessoryButton } from "../utils/appsInTossNav.js";
 import { closeView, openExternalUrl } from "../utils/appsInTossSdk.js";
+import { loadNaverMapScript } from "../utils/naverMapLoader.js";
 import "./Result.css";
 
 // 1. 아이콘 도구(lucide-react)를 다 빼버리고 기본 이모지 사용
@@ -96,7 +97,7 @@ export default function Result() {
     });
   }, [state]);
 
-  // 네이버 지도 로직: 스크립트 로드 대기 후 초기화 (보이다가 사라지는 현상 방지)
+  // 네이버 지도: 스크립트를 명시적으로 로드한 뒤 초기화 (실서비스 도메인 NCP 등록 필수)
   useEffect(() => {
     if (loading || list.length === 0 || !mapElement.current) return;
 
@@ -108,13 +109,11 @@ export default function Result() {
     }
 
     let cancelled = false;
-    let retryCount = 0;
-    const maxRetries = 20; // 약 2초 대기 (100ms * 20)
+    let authErrorTimer = null;
 
-    const tryInitMap = () => {
-      if (cancelled) return;
-      const { naver } = window;
-      if (naver?.maps) {
+    loadNaverMapScript()
+      .then((naver) => {
+        if (cancelled || !mapElement.current) return;
         try {
           const map = new naver.maps.Map(mapElement.current, {
             center: new naver.maps.LatLng(centerLat, centerLng),
@@ -123,7 +122,7 @@ export default function Result() {
           });
 
           const markers = [];
-          list.forEach((item, index) => {
+          list.forEach((item) => {
             const lng = item.lng ?? item.left;
             if (item.lat == null || lng == null) return;
 
@@ -156,23 +155,32 @@ export default function Result() {
             });
             markers.push(marker);
           });
-          setMapReady(true);
+          if (!cancelled) setMapReady(true);
+
+          // 네이버 인증 실패 시 컨테이너에 에러 메시지가 뜨는 경우 감지 → Leaflet으로 전환
+          authErrorTimer = setTimeout(() => {
+            if (cancelled || !mapElement.current) return;
+            const el = mapElement.current;
+            const hasAuthError = el.textContent?.includes("인증이 실패") || el.textContent?.includes("Open API 인증");
+            if (hasAuthError) {
+              console.warn("네이버 지도 인증 실패 감지 → Leaflet으로 전환. NCP 콘솔에서 웹 서비스 URL 등록을 확인하세요.");
+              setMapError(true);
+            }
+          }, 2000);
         } catch (err) {
           console.error("네이버 지도 초기화 실패:", err);
           if (!cancelled) setMapError(true);
         }
-        return;
-      }
-      retryCount += 1;
-      if (retryCount >= maxRetries) {
+      })
+      .catch((err) => {
+        console.warn("네이버 지도 스크립트 로드 실패 → Leaflet 사용. NCP 콘솔에서 실서비스 URL 등록 확인:", err?.message || err);
         if (!cancelled) setMapError(true);
-        return;
-      }
-      setTimeout(tryInitMap, 100);
-    };
+      });
 
-    tryInitMap();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+      if (authErrorTimer) clearTimeout(authErrorTimer);
+    };
   }, [loading, list, isDoMode]);
 
   // 네이버 지도 실패 시 Leaflet(OpenStreetMap)으로 표시 — API 키/URL 등록 불필요

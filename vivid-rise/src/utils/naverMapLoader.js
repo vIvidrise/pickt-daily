@@ -2,10 +2,12 @@
  * 네이버 지도 JavaScript API v3 (웹용) 스크립트 로더
  * - 2025.05 기준: ncpKeyId 사용 (ncpClientId → ncpKeyId 변경)
  * - 문서: https://navermaps.github.io/maps.js.ncp/docs/
- * - NCP 웹 서비스 URL에 접속 주소(예: http://localhost:5173) 등록 필수
+ * - NCP 콘솔에서 웹 서비스 URL에 실서비스 도메인(예: https://pickt-daily.vercel.app) 등록 필수
  */
 
-const CLIENT_ID = "tfdaiuu9rx";
+const CLIENT_ID = typeof import.meta !== "undefined" && import.meta.env?.VITE_NAVER_MAP_CLIENT_ID
+  ? import.meta.env.VITE_NAVER_MAP_CLIENT_ID
+  : "tfdaiuu9rx";
 const SCRIPT_URL = `https://openapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=${CLIENT_ID}`;
 
 let loading = false;

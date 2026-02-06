@@ -69,6 +69,17 @@
   .big-card:active { transform: scale(0.98); }
   .big-card-emoji { font-size: 40px; line-height: 1; }
   .card-text { font-size: 15px; font-weight: 600; color: #4E5968; }
+
+  /* 오늘 내 운세 배너 — 나만의 리스트 하단 */
+  .fortune-banner-section { padding: 12px 0 4px; }
+  .fortune-banner-btn {
+    display: block; width: 100%; padding: 0; border: none; border-radius: 16px;
+    overflow: hidden; background: transparent; cursor: pointer;
+  }
+  .fortune-banner-btn:active { opacity: 0.95; }
+  .fortune-banner-img {
+    width: 100%; height: auto; display: block; vertical-align: top;
+  }
   
   /* 찜한 장소 (스크롤 영역 안) */
   .home-scroll-wrap .favorites-section { padding: 16px 20px; }
@@ -97,16 +108,30 @@
     padding: 2px 20px 40px 20px; 
   }
   
-  .ranking-title { font-size: 18px; font-weight: 700; color: #191F28; margin-bottom: 16px; }
+  .ranking-title { font-size: 18px; font-weight: 700; color: #191F28; margin-bottom: 4px; }
+  .ranking-subtitle { font-size: 13px; color: #8B95A1; margin: 0 0 12px 0; }
+  .ranking-tabs {
+    display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap;
+  }
+  .ranking-tab {
+    padding: 8px 14px; font-size: 13px; font-weight: 600; color: #4E5968;
+    background: #F2F4F6; border: none; border-radius: 20px; cursor: pointer;
+  }
+  .ranking-tab:hover { background: #E5E8EB; color: #191F28; }
+  .ranking-tab.active { background: #3182F6; color: #fff; }
   .ranking-list { display: flex; flex-direction: column; }
   .ranking-item { display: flex; align-items: center; padding: 12px 0; gap: 16px; }
   .rank-icon-wrapper { width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
   .bg-grey { background-color: #F2F4F6; }
   .emoji-icon { font-size: 24px; }
-  .rank-info { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+  .rank-info { flex: 1; display: flex; flex-direction: column; gap: 4px; min-width: 0; }
   .rank-name { font-size: 16px; font-weight: 700; color: #191F28; }
+  .rank-solo-tag {
+    display: inline-block; font-size: 12px; font-weight: 600; color: #3182F6;
+    background: #E8F3FF; padding: 4px 10px; border-radius: 8px; width: fit-content;
+  }
   .rank-desc { font-size: 13px; color: #8B95A1; }
-  .medal-wrapper { font-size: 24px; }
+  .medal-wrapper { font-size: 24px; flex-shrink: 0; }
   .badge-grey { font-size: 14px; font-weight: 700; color: #8B95A1; background-color: #F2F4F6; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
   
   /* 선택 흐름 — 뷰포트 안에 하단 버튼이 들어가도록 */

@@ -54,6 +54,8 @@ body {
 .app-container.use-toss-nav .map-page .map-container { top: 0; }
 .app-container.use-toss-nav .map-page { padding-top: 0; }
 .app-container.use-toss-nav .map-page .bottom-floating-area { padding-top: 8px; }
+.app-container.use-toss-nav .fortune-page,
+.app-container.use-toss-nav .fortune-result-page { padding-top: calc(44px + var(--safe-area-inset-top, env(safe-area-inset-top, 0px))); }
 /* Quick_Navigation - Top / IOS - Light: height 44 */
 .header-nav {
   display: flex;
