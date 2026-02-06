@@ -44,9 +44,12 @@ body {
 }
 
 /* Safe Area: SDK 값이 있으면 var()로 적용, 없으면 env() fallback (앱인토스 문서 준수) */
+/* 앱인토스: 네이티브 상단 헤더 사용 → 웹 헤더 숨기고, 콘텐츠만 44px + Safe Area 아래로 */
 .app-container.use-toss-nav .home-header,
-.app-container.use-toss-nav .confirm-header { display: none !important; }
+.app-container.use-toss-nav .confirm-header,
+.app-container.use-toss-nav .saved-header { display: none !important; }
 .app-container.use-toss-nav .home-page { padding-top: calc(44px + var(--safe-area-inset-top, env(safe-area-inset-top, 0px))); }
+.app-container.use-toss-nav .saved-page { padding-top: calc(44px + var(--safe-area-inset-top, env(safe-area-inset-top, 0px))); }
 .app-container.use-toss-nav .flow-container { padding-top: calc(44px + var(--safe-area-inset-top, env(safe-area-inset-top, 0px))); }
 .app-container.use-toss-nav .confirm-page { padding-top: calc(44px + var(--safe-area-inset-top, env(safe-area-inset-top, 0px))); }
 .app-container.use-toss-nav .select-page { padding-top: calc(44px + var(--safe-area-inset-top, env(safe-area-inset-top, 0px))); }
