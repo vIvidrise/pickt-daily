@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 import { ChevronLeft, X } from "lucide-react";
@@ -6,14 +6,30 @@ import { closeView } from "../utils/appsInTossSdk.js";
 import { LocationPermissionModal } from "../components/LocationPermissionModal.jsx";
 import "./Fortune.css";
 
+const CURRENT_YEAR = new Date().getFullYear();
+const YEARS = Array.from({ length: CURRENT_YEAR - 1940 + 1 }, (_, i) => CURRENT_YEAR - i);
+const MONTHS = Array.from({ length: 12 }, (_, i) => i + 1);
+const getDaysInMonth = (y, m) => new Date(y, m, 0).getDate();
+
 export default function Fortune() {
   const navigate = useNavigate();
   const [name, setName] = useState("");
-  const [birthDate, setBirthDate] = useState("");
+  const [birthYear, setBirthYear] = useState("");
+  const [birthMonth, setBirthMonth] = useState("");
+  const [birthDay, setBirthDay] = useState("");
   const [birthTime, setBirthTime] = useState("");
   const [timeUnknown, setTimeUnknown] = useState(false);
   const [showLocationModal, setShowLocationModal] = useState(false);
 
+  useEffect(() => {
+    if (!birthYear || !birthMonth || !birthDay) return;
+    const max = getDaysInMonth(Number(birthYear), Number(birthMonth));
+    if (Number(birthDay) > max) setBirthDay(String(max));
+  }, [birthYear, birthMonth, birthDay]);
+
+  const birthDate = birthYear && birthMonth && birthDay
+    ? `${birthYear}-${String(birthMonth).padStart(2, "0")}-${String(birthDay).padStart(2, "0")}`
+    : "";
   const canSubmit = name.trim() && birthDate && (timeUnknown || birthTime);
 
   const goToResult = (locationGranted, coords = null) => {
@@ -88,27 +104,56 @@ export default function Fortune() {
         </div>
 
         <div className="fortune-field">
-          <label htmlFor="fortune-date">생년월일</label>
-          <input
-            id="fortune-date"
-            type="date"
-            value={birthDate}
-            onChange={(e) => setBirthDate(e.target.value)}
-            className="fortune-input"
-          />
+          <label>생년월일</label>
+          <div className="fortune-date-row">
+            <select
+              id="fortune-year"
+              value={birthYear}
+              onChange={(e) => setBirthYear(e.target.value)}
+              className="fortune-select"
+              aria-label="년"
+            >
+              <option value="">년</option>
+              {YEARS.map((y) => (
+                <option key={y} value={y}>{y}년</option>
+              ))}
+            </select>
+            <select
+              id="fortune-month"
+              value={birthMonth}
+              onChange={(e) => setBirthMonth(e.target.value)}
+              className="fortune-select"
+              aria-label="월"
+            >
+              <option value="">월</option>
+              {MONTHS.map((m) => (
+                <option key={m} value={m}>{m}월</option>
+              ))}
+            </select>
+            <select
+              id="fortune-day"
+              value={birthDay}
+              onChange={(e) => setBirthDay(e.target.value)}
+              className="fortune-select"
+              aria-label="일"
+            >
+              <option value="">일</option>
+              {(birthYear && birthMonth
+                ? Array.from(
+                    { length: getDaysInMonth(Number(birthYear), Number(birthMonth)) },
+                    (_, i) => i + 1
+                  )
+                : Array.from({ length: 31 }, (_, i) => i + 1)
+              ).map((d) => (
+                <option key={d} value={d}>{d}일</option>
+              ))}
+            </select>
+          </div>
         </div>
 
-        <div className="fortune-field fortune-field-time">
-          <label htmlFor="fortune-time">태어난 시간</label>
-          <div className="fortune-time-row">
-            <input
-              id="fortune-time"
-              type="time"
-              value={birthTime}
-              onChange={(e) => setBirthTime(e.target.value)}
-              className="fortune-input fortune-input-time"
-              disabled={timeUnknown}
-            />
+        <div className="fortune-field">
+          <div className="fortune-time-label-row">
+            <label htmlFor="fortune-time">태어난 시간</label>
             <button
               type="button"
               className={`fortune-unknown-btn ${timeUnknown ? "active" : ""}`}
@@ -117,6 +162,14 @@ export default function Fortune() {
               모름
             </button>
           </div>
+          <input
+            id="fortune-time"
+            type="time"
+            value={birthTime}
+            onChange={(e) => setBirthTime(e.target.value)}
+            className="fortune-input"
+            disabled={timeUnknown}
+          />
         </div>
 
         <div className="fortune-actions">
