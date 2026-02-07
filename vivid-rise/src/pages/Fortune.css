@@ -117,7 +117,21 @@
   cursor: not-allowed;
 }
 
-/* 태어난 시간 — 라벨+모름 같은 줄, 입력 전체 너비 */
+/* 태어난 시간 — 이름 입력창과 동일한 너비로 제한 (네이티브 time input min-width 오버라이드) */
+.fortune-field-time {
+  overflow: hidden;
+}
+.fortune-time-input-wrap {
+  width: 100%;
+  min-width: 0;
+  overflow: hidden;
+}
+.fortune-time-input-wrap .fortune-input,
+input[type="time"].fortune-input {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+}
 .fortune-time-label-row {
   display: flex;
   align-items: center;

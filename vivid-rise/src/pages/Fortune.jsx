@@ -151,7 +151,7 @@ export default function Fortune() {
           </div>
         </div>
 
-        <div className="fortune-field">
+        <div className="fortune-field fortune-field-time">
           <div className="fortune-time-label-row">
             <label htmlFor="fortune-time">태어난 시간</label>
             <button
@@ -162,14 +162,16 @@ export default function Fortune() {
               모름
             </button>
           </div>
-          <input
-            id="fortune-time"
-            type="time"
-            value={birthTime}
-            onChange={(e) => setBirthTime(e.target.value)}
-            className="fortune-input"
-            disabled={timeUnknown}
-          />
+          <div className="fortune-time-input-wrap">
+            <input
+              id="fortune-time"
+              type="time"
+              value={birthTime}
+              onChange={(e) => setBirthTime(e.target.value)}
+              className="fortune-input"
+              disabled={timeUnknown}
+            />
+          </div>
         </div>
 
         <div className="fortune-actions">
