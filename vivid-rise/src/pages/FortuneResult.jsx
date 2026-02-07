@@ -1,9 +1,7 @@
 import { useEffect, useState } from "react";
-import { createPortal } from "react-dom";
 import { useLocation, useNavigate } from "react-router-dom";
 import { ChevronLeft, X } from "lucide-react";
 import { closeView } from "../utils/appsInTossSdk.js";
-import { LocationPermissionModal } from "../components/LocationPermissionModal.jsx";
 import { LuckyPlaceSwiper } from "../components/LuckyPlaceSwiper.jsx";
 import { fetchLuckyPlacesNearby } from "../api/gemini.js";
 import "./FortuneResult.css";
@@ -74,64 +72,35 @@ export default function FortuneResult() {
   const [phrase] = useState(() => PHRASES[Math.floor(Math.random() * PHRASES.length)]);
   const [animating, setAnimating] = useState(false);
 
-  const [showLocationModal, setShowLocationModal] = useState(true);
-  const [locationPromptAnswered, setLocationPromptAnswered] = useState(false);
-  const [locationGranted, setLocationGranted] = useState(false);
-  const [locationCoords, setLocationCoords] = useState(null);
+  const { locationGranted: grantedFromState, locationCoords: coordsFromState } = state || {};
+  const [locationGranted, setLocationGranted] = useState(!!grantedFromState);
   const [luckyPlaces, setLuckyPlaces] = useState([]);
   const [luckyPlacesLoading, setLuckyPlacesLoading] = useState(false);
 
   useEffect(() => {
-    if (!locationPromptAnswered) return;
     const t = requestAnimationFrame(() => {
       requestAnimationFrame(() => setAnimating(true));
     });
     return () => cancelAnimationFrame(t);
-  }, [locationPromptAnswered]);
+  }, []);
 
-  const handleLocationAllow = () => {
-    setShowLocationModal(false);
-    setLocationPromptAnswered(true);
-    if (!navigator.geolocation) {
-      setLocationGranted(false);
-      return;
-    }
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        const { latitude, longitude } = pos.coords;
-        setLocationCoords({ lat: latitude, lng: longitude });
-        setLocationGranted(true);
-        setLuckyPlacesLoading(true);
-        fetchLuckyPlacesNearby({ keyword: menu, lat: latitude, lng: longitude })
-          .then(setLuckyPlaces)
-          .catch(() => setLuckyPlaces([]))
-          .finally(() => setLuckyPlacesLoading(false));
-      },
-      () => setLocationGranted(false),
-      { enableHighAccuracy: true, timeout: 10000 }
-    );
-  };
-
-  const handleLocationSkip = () => {
-    setShowLocationModal(false);
-    setLocationPromptAnswered(true);
-    setLocationGranted(false);
-  };
+  useEffect(() => {
+    if (!grantedFromState || !coordsFromState?.lat || !coordsFromState?.lng || !menu) return;
+    setLuckyPlacesLoading(true);
+    fetchLuckyPlacesNearby({
+      keyword: menu,
+      lat: coordsFromState.lat,
+      lng: coordsFromState.lng,
+    })
+      .then(setLuckyPlaces)
+      .catch(() => setLuckyPlaces([]))
+      .finally(() => setLuckyPlacesLoading(false));
+  }, [grantedFromState, coordsFromState?.lat, coordsFromState?.lng, menu]);
 
   const dateStr = getFormattedDate();
 
-  const locationModalEl = showLocationModal ? (
-    <LocationPermissionModal
-      name={name}
-      onAllow={handleLocationAllow}
-      onSkip={handleLocationSkip}
-    />
-  ) : null;
-
   return (
     <div className="page fortune-result-page">
-      {locationModalEl && createPortal(locationModalEl, document.body)}
-
       <header className="fortune-result-header">
         <button type="button" className="icon-btn" onClick={() => navigate(-1)} aria-label="뒤로가기">
           <ChevronLeft size={24} color="#191F28" />

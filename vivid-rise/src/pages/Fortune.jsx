@@ -1,7 +1,9 @@
 import { useState } from "react";
+import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 import { ChevronLeft, X } from "lucide-react";
 import { closeView } from "../utils/appsInTossSdk.js";
+import { LocationPermissionModal } from "../components/LocationPermissionModal.jsx";
 import "./Fortune.css";
 
 export default function Fortune() {
@@ -10,23 +12,57 @@ export default function Fortune() {
   const [birthDate, setBirthDate] = useState("");
   const [birthTime, setBirthTime] = useState("");
   const [timeUnknown, setTimeUnknown] = useState(false);
+  const [showLocationModal, setShowLocationModal] = useState(false);
 
   const canSubmit = name.trim() && birthDate && (timeUnknown || birthTime);
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (!canSubmit) return;
+  const goToResult = (locationGranted, coords = null) => {
+    setShowLocationModal(false);
     navigate("/fortune/result", {
       state: {
         name: name.trim(),
         birthDate,
         birthTime: timeUnknown ? null : birthTime,
+        locationGranted,
+        locationCoords: coords,
       },
     });
   };
 
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!canSubmit) return;
+    setShowLocationModal(true);
+  };
+
+  const handleLocationAllow = () => {
+    if (!navigator.geolocation) {
+      goToResult(false);
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      (pos) => goToResult(true, { lat: pos.coords.latitude, lng: pos.coords.longitude }),
+      () => goToResult(false),
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  };
+
+  const handleLocationSkip = () => {
+    goToResult(false);
+  };
+
+  const modalEl = showLocationModal ? (
+    <LocationPermissionModal
+      name={name.trim() || "회원"}
+      onAllow={handleLocationAllow}
+      onSkip={handleLocationSkip}
+    />
+  ) : null;
+
   return (
     <div className="page fortune-page">
+      {modalEl && createPortal(modalEl, document.body)}
+
       <header className="fortune-header">
         <button type="button" className="icon-btn" onClick={() => navigate(-1)} aria-label="뒤로가기">
           <ChevronLeft size={24} color="#191F28" />
