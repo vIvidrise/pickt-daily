@@ -131,6 +131,21 @@ input[type="time"].fortune-input {
   width: 100% !important;
   max-width: 100% !important;
   min-width: 0 !important;
+  /* 이름 입력창과 동일한 스타일 — 네이티브 time input 기본값 제거 */
+  -webkit-appearance: none;
+  appearance: none;
+  padding: 0 16px;
+  font-size: 16px;
+  color: #191F28;
+  background: #F2F4F6;
+  border: 1px solid #E5E8EB;
+  border-radius: 12px;
+}
+.fortune-time-input-wrap .fortune-input:focus,
+input[type="time"].fortune-input:focus {
+  outline: none;
+  border-color: #3182F6;
+  background: #fff;
 }
 .fortune-time-label-row {
   display: flex;
