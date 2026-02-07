@@ -70,18 +70,11 @@
   .big-card-emoji { font-size: 40px; line-height: 1; }
   .card-text { font-size: 15px; font-weight: 600; color: #4E5968; }
 
-  /* 오늘 내 운세 배너 — 파란 버튼 (Toss 블루) */
+  /* 오늘 내 운세 배너 — 이미지 유지 (보라·오렌지 배너, 비비 캐릭터) */
   .fortune-banner-section { padding: 12px 0 4px; }
   .fortune-banner-btn {
     display: block; width: 100%; padding: 0; border: none; border-radius: 16px;
     overflow: hidden; background: transparent; cursor: pointer;
-  }
-  .fortune-banner-btn-blue {
-    background-color: #3182F6;
-    color: white;
-    font-size: 16px;
-    font-weight: 700;
-    padding: 16px 20px;
   }
   .fortune-banner-btn:active { opacity: 0.95; }
   .fortune-banner-img {
