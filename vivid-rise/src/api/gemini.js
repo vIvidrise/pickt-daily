@@ -225,45 +225,29 @@ const getNaverPlaceRegionHint = (regionKey) => {
   return hints[regionKey] || regionKey.split('·')[0] || regionKey;
 };
 
-// 장소명 → 네이버 플레이스 직접 링크 (검색 시 잘못된 장소 노출 방지)
-// map.naver.com/p/entry/place/{id} 형식 — 모바일에서도 동일 장소로 연결됨
-const NAVER_PLACE_OVERRIDES = {
-  '그라운드시소 성수': 'https://map.naver.com/p/entry/place/33912842',
-  '디뮤지엄': 'https://map.naver.com/p/entry/place/35967685',
-  'KT&G 상상마당': 'https://map.naver.com/p/entry/place/38587992',
-  '소문난성수감자탕': 'https://map.naver.com/p/entry/place/18681751',
-  '대림창고': 'https://map.naver.com/p/entry/place/1225970946',
-  '노티드 성수': 'https://map.naver.com/p/entry/place/1197169023',
-  '해피치즈스마일': 'https://map.naver.com/p/entry/place/1067630671',
-  '도산분식': 'https://map.naver.com/p/entry/place/37496228',
-  '팩피': 'https://map.naver.com/p/entry/place/37825758',
-  '문화식당': 'https://map.naver.com/p/entry/place/36704461',
-  '전자방': 'https://map.naver.com/p/entry/place/11538679',
-  '금금': 'https://map.naver.com/p/entry/place/37292661',
-  '탐광': 'https://map.naver.com/p/entry/place/1309763139',
-  '배키욘방': 'https://map.naver.com/p/entry/place/19974401',
-  '호호식당': 'https://map.naver.com/p/entry/place/37105578',
-  '할머니의레시피': 'https://map.naver.com/p/entry/place/13140890',
-  '성수다락': 'https://map.naver.com/p/entry/place/36709692',
-  '다로베': 'https://map.naver.com/p/entry/place/12310477',
-  '중앙감속기': 'https://map.naver.com/p/entry/place/13517856',
-  '갓잇': 'https://map.naver.com/p/entry/place/1373573456',
-  '와하카': 'https://map.naver.com/p/entry/place/1238806056',
-  '토마틸로': 'https://map.naver.com/p/entry/place/1283957280',
-  '잇샐러드': 'https://map.naver.com/p/entry/place/1301547344',
-  '르베지왕': 'https://map.naver.com/p/entry/place/1309738209',
-  '샐러디': 'https://map.naver.com/p/entry/place/36830169',
-  '어니언': 'https://map.naver.com/p/entry/place/12191525',
+// 장소별 검색 보조 키워드 (정확한 장소 검색 — 네이버 검색 시 다른 장소 노출 방지)
+// 예: "그라운드시소 성수"만 검색 시 아잇갤러리 등 다른 장소 노출 → "성수낙낙" 추가
+const PLACE_SEARCH_HINTS = {
+  '그라운드시소 성수': '성수낙낙',
+  '디뮤지엄': '서울숲',
+  '금금': '성수동',
+  '도산분식': '신사동',
+  '소문난성수감자탕': '연무장길',
+  '디올 성수': '성수동',
+  '피치스 도원': '성수동',
 };
 
-/** 장소명 + 지역으로 네이버 플레이스 URL 생성 (직접 링크 우선, 없으면 검색) */
+/** 장소명 + 지역으로 네이버 플레이스 검색 URL 생성 */
 function buildNaverPlaceUrl(name, regionKey) {
-  const override = NAVER_PLACE_OVERRIDES[name?.trim()];
-  if (override) return override;
   const regionHint = getNaverPlaceRegionHint(regionKey);
-  // 장소명에 이미 지역명이 포함되어 있으면 검색 쿼리 중복 방지 (예: "그라운드시소 성수" + "성수" → 잘못된 결과)
-  const query = name?.includes(regionHint) ? name : `${name} ${regionHint}`;
-  return `https://m.place.naver.com/place/list?query=${encodeURIComponent(query)}`;
+  const extraHint = PLACE_SEARCH_HINTS[name?.trim()];
+  // 장소명에 이미 지역이 있으면 중복 방지. 보조 키워드가 있으면 추가로 붙여 검색 정확도 향상
+  let query = name?.includes(regionHint) ? name : `${name} ${regionHint}`;
+  if (extraHint && !query.includes(extraHint)) {
+    query = `${query} ${extraHint}`;
+  }
+  // 네이버 지도 검색 — 해당 지역 지도와 함께 검색 결과 표시
+  return `https://map.naver.com/p/search?query=${encodeURIComponent(query)}`;
 }
 
 // 7. 메인 함수 (외부에서 호출)
