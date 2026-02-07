@@ -162,3 +162,27 @@
   font-weight: 700;
   color: #191F28;
 }
+
+/* 행운 장소 섹션 (나의 찜한 코스와 동일 스타일) */
+.fortune-lucky-places-section {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid #F2F4F6;
+}
+
+.fortune-lucky-places-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #27272a;
+  margin: 0 0 12px;
+  line-height: 1.4;
+}
+
+.fortune-lucky-places-loading {
+  padding: 24px 16px;
+  font-size: 14px;
+  color: #8B95A1;
+  text-align: center;
+  background: rgba(242, 244, 246, 0.8);
+  border-radius: 12px;
+}

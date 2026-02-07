@@ -168,10 +168,10 @@ export default function Home() {
                   <span className="card-text">나만의 리스트</span>
                 </button>
               </div>
-              {/* 오늘 내 운세 배너 — 클릭 시 입력 페이지로 이동 */}
+              {/* 오늘 내 운세 배너 — 파란 버튼, 클릭 시 입력 페이지로 이동 */}
               <section className="fortune-banner-section" aria-label="오늘 내 운세">
-                <button type="button" className="fortune-banner-btn" onClick={() => navigate("/fortune")}>
-                  <img src="/fortune-banner.png" alt="오늘 내 운세 - 오늘의 운세를 확인해 보세요" className="fortune-banner-img" />
+                <button type="button" className="fortune-banner-btn fortune-banner-btn-blue" onClick={() => navigate("/fortune")}>
+                  ✨ 오늘 내 운세
                 </button>
               </section>
             </div>

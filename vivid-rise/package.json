@@ -4,12 +4,14 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
+    "dev": "granite dev",
+    "build": "granite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "deploy": "ait deploy"
   },
   "dependencies": {
+    "@apps-in-toss/web-framework": "^1.9.2",
     "@google/generative-ai": "^0.21.0",
     "@supabase/supabase-js": "^2.94.0",
     "framer-motion": "^12.31.2",

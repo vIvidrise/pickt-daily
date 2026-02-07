@@ -2,6 +2,9 @@ import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { ChevronLeft, X } from "lucide-react";
 import { closeView } from "../utils/appsInTossSdk.js";
+import { LocationPermissionModal } from "../components/LocationPermissionModal.jsx";
+import { LuckyPlaceSwiper } from "../components/LuckyPlaceSwiper.jsx";
+import { fetchLuckyPlacesNearby } from "../api/gemini.js";
 import "./FortuneResult.css";
 
 const RECOMMEND_MENUS = [
@@ -36,7 +39,7 @@ const PHRASES = [
 const DAY_NAMES = ["일요일", "월요일", "화요일", "수요일", "목요일", "금요일", "토요일"];
 
 function getRandomClarity() {
-  return Math.floor(Math.random() * 31) + 70; // 70 ~ 100
+  return Math.floor(Math.random() * 31) + 70;
 }
 
 function getRandomMenu() {
@@ -70,6 +73,12 @@ export default function FortuneResult() {
   const [phrase] = useState(() => PHRASES[Math.floor(Math.random() * PHRASES.length)]);
   const [animating, setAnimating] = useState(false);
 
+  const [showLocationModal, setShowLocationModal] = useState(false);
+  const [locationGranted, setLocationGranted] = useState(false);
+  const [locationCoords, setLocationCoords] = useState(null);
+  const [luckyPlaces, setLuckyPlaces] = useState([]);
+  const [luckyPlacesLoading, setLuckyPlacesLoading] = useState(false);
+
   useEffect(() => {
     const t = requestAnimationFrame(() => {
       requestAnimationFrame(() => setAnimating(true));
@@ -77,10 +86,54 @@ export default function FortuneResult() {
     return () => cancelAnimationFrame(t);
   }, []);
 
+  const requestLocationOnMount = () => {
+    setShowLocationModal(true);
+  };
+
+  useEffect(() => {
+    const timer = setTimeout(requestLocationOnMount, 600);
+    return () => clearTimeout(timer);
+  }, []);
+
+  const handleLocationAllow = () => {
+    setShowLocationModal(false);
+    if (!navigator.geolocation) {
+      setLocationGranted(false);
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const { latitude, longitude } = pos.coords;
+        setLocationCoords({ lat: latitude, lng: longitude });
+        setLocationGranted(true);
+        setLuckyPlacesLoading(true);
+        fetchLuckyPlacesNearby({ keyword: menu, lat: latitude, lng: longitude })
+          .then(setLuckyPlaces)
+          .catch(() => setLuckyPlaces([]))
+          .finally(() => setLuckyPlacesLoading(false));
+      },
+      () => setLocationGranted(false),
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  };
+
+  const handleLocationSkip = () => {
+    setShowLocationModal(false);
+    setLocationGranted(false);
+  };
+
   const dateStr = getFormattedDate();
 
   return (
     <div className="page fortune-result-page">
+      {showLocationModal && (
+        <LocationPermissionModal
+          name={name}
+          onAllow={handleLocationAllow}
+          onSkip={handleLocationSkip}
+        />
+      )}
+
       <header className="fortune-result-header">
         <button type="button" className="icon-btn" onClick={() => navigate(-1)} aria-label="뒤로가기">
           <ChevronLeft size={24} color="#191F28" />
@@ -92,7 +145,6 @@ export default function FortuneResult() {
       </header>
 
       <main className={`fortune-result-scroll ${animating ? "animate" : ""}`}>
-        {/* 1. 행운 지수 카드 */}
         <section className="fortune-card fortune-card-summary">
           <div className="fortune-card-summary-left">
             <p className="fortune-card-date">{dateStr}</p>
@@ -105,7 +157,6 @@ export default function FortuneResult() {
           </div>
         </section>
 
-        {/* 2. 행운의 음식 · 행운의 컬러 · 행운의 점수 */}
         <section className="fortune-card fortune-card-lucky">
           <div className="fortune-lucky-col">
             <div className="fortune-lucky-icon fortune-lucky-food">
@@ -126,11 +177,26 @@ export default function FortuneResult() {
           </div>
         </section>
 
-        {/* 3. 결과 텍스트 */}
         <p className="fortune-result-text">
           오늘 <strong>{name}</strong>님의 선명도는 <strong>{clarity}%</strong>!
           가장 빛나는 하루를 위해 <strong>'{menu}'</strong>를 추천해요.
         </p>
+
+        {locationGranted && (
+          <section className="fortune-lucky-places-section">
+            <h3 className="fortune-lucky-places-title">
+              지금 {name}님 근처의 '{menu}' 행운 장소예요!
+            </h3>
+            {luckyPlacesLoading ? (
+              <div className="fortune-lucky-places-loading">행운 장소를 찾는 중…</div>
+            ) : (
+              <LuckyPlaceSwiper
+                places={luckyPlaces}
+                emptyMessage="근처에 추천 장소가 없어요. 다른 지역에서 확인해 보세요!"
+              />
+            )}
+          </section>
+        )}
       </main>
     </div>
   );

@@ -1,0 +1,95 @@
+/* 행운 장소 카드 — Glassmorphism, 나의 찜한 코스 스타일 */
+.lucky-place-swiper-wrap {
+  margin: 0 -20px;
+  padding: 0 20px;
+}
+
+.lucky-place-swiper {
+  overflow: visible;
+}
+
+.lucky-place-slide {
+  width: 280px;
+  flex-shrink: 0;
+}
+
+.lucky-place-card {
+  width: 100%;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  text-align: left;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.lucky-place-card:active {
+  transform: scale(0.98);
+}
+.lucky-place-card:hover {
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.12);
+}
+
+.lucky-place-card-content {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 100px;
+}
+
+.lucky-place-card-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.lucky-place-emoji {
+  font-size: 28px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.lucky-place-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.lucky-place-name {
+  font-size: 16px;
+  font-weight: 700;
+  color: #191F28;
+  margin: 0;
+  line-height: 1.3;
+}
+
+.lucky-place-distance {
+  font-size: 13px;
+  color: #3182F6;
+  font-weight: 600;
+}
+
+.lucky-place-level {
+  font-size: 12px;
+  color: #8B95A1;
+}
+
+.lucky-place-card-character {
+  flex-shrink: 0;
+  width: 64px;
+}
+
+.lucky-place-swiper-empty {
+  padding: 24px 16px;
+  font-size: 14px;
+  color: #8B95A1;
+  text-align: center;
+  background: rgba(242, 244, 246, 0.8);
+  border-radius: 12px;
+}

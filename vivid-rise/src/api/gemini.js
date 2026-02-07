@@ -308,6 +308,79 @@ function getClosestRegionKey(db, lat, lng) {
   return bestKey;
 }
 
+/** lucky_food(행운의 음식) → DB 카테고리 매핑 */
+const LUCKY_FOOD_TO_CATEGORY = {
+  '순대국': '한식', '카레': '양식', '파스타': '양식', '비빔밥': '한식', '라멘': '일식',
+  '돈카츠': '일식', '삼겹살': '한식', '초밥': '일식', '브런치': '양식', '아메리카노': '디저트',
+  '디저트': '디저트', '떡볶이': '분식', '쌈밥': '한식', '불고기': '한식', '해산물': '일식',
+  '스테이크': '양식',
+};
+
+/** Haversine 거리 계산 (km) */
+function haversineKm(lat1, lng1, lat2, lng2) {
+  const R = 6371;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLng = (lng2 - lng1) * Math.PI / 180;
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLng / 2) ** 2;
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
+
+/**
+ * 운세 lucky_food + 유저 좌표 기준 반경 1km 내 행운 장소 검색
+ * @param {{ keyword: string, lat: number, lng: number }} params
+ * @returns {Promise<Array<{ name: string, distance: number, distanceText: string, solo_difficulty_level: number, naverUrl: string, emoji: string }>>}
+ */
+export async function fetchLuckyPlacesNearby(params) {
+  const db = await getDatabase();
+  const { keyword, lat, lng } = params || {};
+  if (lat == null || lng == null || !keyword) return [];
+
+  const regionKey = getClosestRegionKey(db, lat, lng);
+  const regionData = db[regionKey] || db['강남·서초'];
+  const categoryMap = regionData.eat || {};
+  const category = LUCKY_FOOD_TO_CATEGORY[keyword] || '한식';
+  let placeNames = categoryMap[category];
+  if (!placeNames || placeNames.length === 0) {
+    placeNames = Object.values(categoryMap).flat();
+  }
+  placeNames = [...new Set(placeNames)].sort(() => 0.5 - Math.random()).slice(0, 8);
+
+  const centerLat = regionData.coords?.lat ?? lat;
+  const centerLng = regionData.coords?.lng ?? lng;
+  const getOffset = () => (Math.random() - 0.5) * 0.01;
+  const placeRegionHint = getNaverPlaceRegionHint(regionKey);
+
+  const results = placeNames.map((name, index) => {
+    const placeLat = centerLat + getOffset();
+    const placeLng = centerLng + getOffset();
+    const distanceKm = haversineKm(lat, lng, placeLat, placeLng);
+    const distanceM = Math.round(distanceKm * 1000);
+    const distanceText = distanceM >= 1000 ? `${(distanceKm).toFixed(1)}km` : `${distanceM}m`;
+    const solo_difficulty_level = Math.min(5, Math.max(1, (index % 5) + 1));
+    const naverUrl = `https://m.place.naver.com/place/list?query=${encodeURIComponent(`${name} ${placeRegionHint}`)}`;
+    return {
+      name,
+      lat: placeLat,
+      lng: placeLng,
+      distance: distanceM,
+      distanceText,
+      solo_difficulty_level,
+      naverUrl,
+      emoji: getCategoryEmoji(category),
+    };
+  });
+
+  const within1km = results.filter((r) => r.distance <= 1000);
+  const sorted = (within1km.length > 0 ? within1km : results)
+    .sort((a, b) => a.distance - b.distance)
+    .slice(0, 5);
+
+  return new Promise((resolve) => setTimeout(() => resolve(sorted), 500));
+}
+
 /**
  * 찜한 장소 근처의 반대 유형 1곳 추천 (나의 찜한 코스용)
  * @param {{ lat: number, lng: number, type: 'eat' | 'do' }} params - 찜한 장소의 좌표와 유형
