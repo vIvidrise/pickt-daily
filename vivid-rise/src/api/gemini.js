@@ -225,6 +225,47 @@ const getNaverPlaceRegionHint = (regionKey) => {
   return hints[regionKey] || regionKey.split('·')[0] || regionKey;
 };
 
+// 장소명 → 네이버 플레이스 직접 링크 (검색 시 잘못된 장소 노출 방지)
+// map.naver.com/p/entry/place/{id} 형식 — 모바일에서도 동일 장소로 연결됨
+const NAVER_PLACE_OVERRIDES = {
+  '그라운드시소 성수': 'https://map.naver.com/p/entry/place/33912842',
+  '디뮤지엄': 'https://map.naver.com/p/entry/place/35967685',
+  'KT&G 상상마당': 'https://map.naver.com/p/entry/place/38587992',
+  '소문난성수감자탕': 'https://map.naver.com/p/entry/place/18681751',
+  '대림창고': 'https://map.naver.com/p/entry/place/1225970946',
+  '노티드 성수': 'https://map.naver.com/p/entry/place/1197169023',
+  '해피치즈스마일': 'https://map.naver.com/p/entry/place/1067630671',
+  '도산분식': 'https://map.naver.com/p/entry/place/37496228',
+  '팩피': 'https://map.naver.com/p/entry/place/37825758',
+  '문화식당': 'https://map.naver.com/p/entry/place/36704461',
+  '전자방': 'https://map.naver.com/p/entry/place/11538679',
+  '금금': 'https://map.naver.com/p/entry/place/37292661',
+  '탐광': 'https://map.naver.com/p/entry/place/1309763139',
+  '배키욘방': 'https://map.naver.com/p/entry/place/19974401',
+  '호호식당': 'https://map.naver.com/p/entry/place/37105578',
+  '할머니의레시피': 'https://map.naver.com/p/entry/place/13140890',
+  '성수다락': 'https://map.naver.com/p/entry/place/36709692',
+  '다로베': 'https://map.naver.com/p/entry/place/12310477',
+  '중앙감속기': 'https://map.naver.com/p/entry/place/13517856',
+  '갓잇': 'https://map.naver.com/p/entry/place/1373573456',
+  '와하카': 'https://map.naver.com/p/entry/place/1238806056',
+  '토마틸로': 'https://map.naver.com/p/entry/place/1283957280',
+  '잇샐러드': 'https://map.naver.com/p/entry/place/1301547344',
+  '르베지왕': 'https://map.naver.com/p/entry/place/1309738209',
+  '샐러디': 'https://map.naver.com/p/entry/place/36830169',
+  '어니언': 'https://map.naver.com/p/entry/place/12191525',
+};
+
+/** 장소명 + 지역으로 네이버 플레이스 URL 생성 (직접 링크 우선, 없으면 검색) */
+function buildNaverPlaceUrl(name, regionKey) {
+  const override = NAVER_PLACE_OVERRIDES[name?.trim()];
+  if (override) return override;
+  const regionHint = getNaverPlaceRegionHint(regionKey);
+  // 장소명에 이미 지역명이 포함되어 있으면 검색 쿼리 중복 방지 (예: "그라운드시소 성수" + "성수" → 잘못된 결과)
+  const query = name?.includes(regionHint) ? name : `${name} ${regionHint}`;
+  return `https://m.place.naver.com/place/list?query=${encodeURIComponent(query)}`;
+}
+
 // 7. 메인 함수 (외부에서 호출)
 export async function fetchRecommendations(params) {
   // 1. DB 로드 (시트 데이터가 있으면 덮어씌워짐)
@@ -253,16 +294,12 @@ export async function fetchRecommendations(params) {
     placeNames = allPlaces.sort(() => 0.5 - Math.random()).slice(0, 5);
   }
 
-  const placeRegionHint = getNaverPlaceRegionHint(regionKey);
-
   // 3. 결과 생성 (좌표는 지역 중심 기준, 주소는 지역으로 통일해 지도와 일치)
   const results = placeNames.slice(0, 3).map((name, index) => {
     const isWaiting = Math.random() > 0.4;
     const randomNotice = NOTICES[Math.floor(Math.random() * NOTICES.length)];
     const address = `${regionKey} 지역 (정확한 위치는 네이버 지도에서 확인)`;
-    // 네이버 플레이스: 가게명 + 지역 키워드(홍대, 강남 등)로 검색해 해당 지역 지도가 나오도록 연결
-    const naverSearchQuery = `${name} ${placeRegionHint}`;
-    const naverUrl = `https://m.place.naver.com/place/list?query=${encodeURIComponent(naverSearchQuery)}`;
+    const naverUrl = buildNaverPlaceUrl(name, regionKey);
 
     const representativeMenu = mode === 'eat' ? pickRepresentativeMenu(category) : '';
     // 혼밥 랭킹 1~5단계 (eat 모드에서 핀 색상용)
@@ -351,7 +388,6 @@ export async function fetchLuckyPlacesNearby(params) {
   const centerLat = regionData.coords?.lat ?? lat;
   const centerLng = regionData.coords?.lng ?? lng;
   const getOffset = () => (Math.random() - 0.5) * 0.01;
-  const placeRegionHint = getNaverPlaceRegionHint(regionKey);
 
   const results = placeNames.map((name, index) => {
     const placeLat = centerLat + getOffset();
@@ -360,7 +396,7 @@ export async function fetchLuckyPlacesNearby(params) {
     const distanceM = Math.round(distanceKm * 1000);
     const distanceText = distanceM >= 1000 ? `${(distanceKm).toFixed(1)}km` : `${distanceM}m`;
     const solo_difficulty_level = Math.min(5, Math.max(1, (index % 5) + 1));
-    const naverUrl = `https://m.place.naver.com/place/list?query=${encodeURIComponent(`${name} ${placeRegionHint}`)}`;
+    const naverUrl = buildNaverPlaceUrl(name, regionKey);
     return {
       name,
       lat: placeLat,
@@ -397,8 +433,7 @@ export async function fetchNearbyRecommendation(params) {
   const placeNames = allNames.length > 0 ? allNames : (wantType === 'eat' ? ['근처 맛집'] : ['근처 활동']);
   const name = placeNames[Math.floor(Math.random() * placeNames.length)];
   const category = Object.entries(categoryMap).find(([, arr]) => arr.includes(name))?.[0] || '추천';
-  const placeRegionHint = getNaverPlaceRegionHint(regionKey);
-  const naverUrl = `https://m.place.naver.com/place/list?query=${encodeURIComponent(`${name} ${placeRegionHint}`)}`;
+  const naverUrl = buildNaverPlaceUrl(name, regionKey);
   return new Promise((resolve) => {
     setTimeout(
       () =>
