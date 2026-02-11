@@ -185,9 +185,11 @@ const BASE_DB = {
   }
 };
 
-// 3. 데이터 캐싱 및 로더
+// 3. 데이터 캐싱 및 로더 (시트 수정 후 2분 지나면 다시 불러옴)
+const SHEET_CACHE_MS = 2 * 60 * 1000;
 let CACHED_DB = null;
-/** 시트에서 로드한 장소별 상세 (주소, 대표메뉴) — 키: `${regionKey}|${name}` */
+let CACHED_DB_TIMESTAMP = 0;
+/** 시트에서 로드한 장소별 상세 (주소, 대표메뉴, naver_map_url) — 키: `${regionKey}|${name}` */
 let CACHED_PLACE_DETAILS = null;
 
 /** 지역/위치 문자열 → 앱 지역키 매핑 (강남·서초 / 용산·이태원 / …) */
@@ -227,7 +229,7 @@ function parseCsvRow(line) {
 }
 
 // 시트 CSV 텍스트를 파싱해 db와 CACHED_PLACE_DETAILS에 병합
-// 컬럼: 카테고리(A), 식당명(B), 지역/위치(C), 네이버 도로명 주소(D), 특징/대표메뉴(E)
+// 컬럼: 카테고리(A), 식당명(B), 지역/위치(C), 네이버 도로명 주소(D), 특징/대표메뉴(E), 네이버 지도 링크(F, 선택)
 function mergeSheetIntoDb(text, db, placeDetails) {
   const rows = text.split(/\r?\n/).slice(1);
   rows.forEach(row => {
@@ -237,6 +239,7 @@ function mergeSheetIntoDb(text, db, placeDetails) {
     const locationHint = (cols[2] || '').trim();
     const address = (cols[3] || '').trim();
     const representativeMenu = (cols[4] || '').trim();
+    const naverMapUrl = (cols[5] || '').trim();
 
     if (!category || !name) return;
 
@@ -251,13 +254,21 @@ function mergeSheetIntoDb(text, db, placeDetails) {
     }
 
     const key = `${regionKey}|${name}`;
-    placeDetails[key] = { address, representativeMenu };
+    const detail = { address, representativeMenu };
+    if (naverMapUrl && naverMapUrl.length > 10 && /naver\.com/.test(naverMapUrl)) {
+      detail.naver_map_url = naverMapUrl;
+    }
+    placeDetails[key] = detail;
   });
 }
 
-// 구글 시트 여러 탭 로드 후 병합 — 모든 탭의 주소로 '네이버에서 보기' 연결
+// 구글 시트 여러 탭 로드 후 병합 — 모든 탭의 주소·F열 네이버 링크로 '네이버에서 보기' 연결
 async function getDatabase() {
-  if (CACHED_DB) return CACHED_DB;
+  const now = Date.now();
+  if (CACHED_DB && now - CACHED_DB_TIMESTAMP < SHEET_CACHE_MS) return CACHED_DB;
+
+  CACHED_DB = null;
+  CACHED_PLACE_DETAILS = null;
 
   const db = JSON.parse(JSON.stringify(BASE_DB));
   CACHED_PLACE_DETAILS = {};
@@ -273,12 +284,13 @@ async function getDatabase() {
     }
   }
 
-  console.log("✅ 구글 시트 데이터 병합 완료 (주소로 네이버에서 보기 연결)");
+  console.log("✅ 구글 시트 데이터 병합 완료 (주소·F열 네이버 링크 반영)");
   CACHED_DB = db;
+  CACHED_DB_TIMESTAMP = Date.now();
   return db;
 }
 
-/** 시트에서 로드한 장소 상세(주소, 대표메뉴) 반환. 없으면 null */
+/** 시트에서 로드한 장소 상세(주소, 대표메뉴, naver_map_url) 반환. 없으면 null */
 export function getPlaceDetails(regionKey, name) {
   if (!CACHED_PLACE_DETAILS || !regionKey || !name) return null;
   const key = `${regionKey}|${name}`;
@@ -412,17 +424,13 @@ const PLACE_IMAGE_URLS = {
   '순대국밥': 'https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=200&h=200&fit=crop',
 };
 
-/** 장소명 + 지역(선택) + 주소(선택)로 네이버 플레이스 검색 URL 생성 — 주소 있으면 해당 장소로 바로 연결 */
+/** 네이버 지도 검색 URL 생성. 검색어는 '장소명 + 지역' 사용 (전체 주소 넣으면 검색 실패 많음) */
 function buildNaverPlaceUrl(name, regionKey, address = '') {
   const regionHint = getNaverPlaceRegionHint(regionKey);
   const extraHint = PLACE_SEARCH_HINTS[name?.trim()];
-  let parts = [name?.trim() || ''];
-  if (address && address.trim()) {
-    parts.push(address.trim());
-  } else {
-    if (regionHint && !name?.includes(regionHint)) parts.push(regionHint);
-    if (extraHint && !name?.includes(extraHint)) parts.push(extraHint);
-  }
+  const parts = [name?.trim() || ''];
+  if (regionHint && !name?.includes(regionHint)) parts.push(regionHint);
+  if (extraHint && !name?.includes(extraHint)) parts.push(extraHint);
   const query = parts.filter(Boolean).join(' ');
   return `https://map.naver.com/p/search/${encodeURIComponent(query)}`;
 }
@@ -525,10 +533,13 @@ export async function fetchRecommendations(params) {
     const representativeMenuStr = (details?.representativeMenu && details.representativeMenu.trim())
       ? details.representativeMenu
       : (mode === 'eat' ? pickRepresentativeMenu(category) : '');
+    const sheetNaverUrl = details?.naver_map_url?.trim();
+    const naverUrl = (sheetNaverUrl && sheetNaverUrl.length > 10 && sheetNaverUrl.includes('naver.com'))
+      ? sheetNaverUrl
+      : buildNaverPlaceUrl(name, regionKey, address);
 
     const isWaiting = Math.random() > 0.4;
     const randomNotice = NOTICES[Math.floor(Math.random() * NOTICES.length)];
-    const naverUrl = buildNaverPlaceUrl(name, regionKey, address);
 
     const solo_difficulty_level = mode === 'eat' ? Math.min(5, Math.max(1, index + 1 + Math.floor(Math.random() * 2))) : 1;
 
@@ -543,6 +554,7 @@ export async function fetchRecommendations(params) {
       statusColor: isWaiting ? "red" : "green",
       notice: randomNotice,
       naverUrl,
+      naver_map_url: naverUrl,
       hours: "11:00 - 22:00",
       address,
       time: ["12:00", "15:00", "18:00"][index],
@@ -620,13 +632,16 @@ export async function fetchLuckyPlacesNearby(params) {
   const results = placeNames.map((name, index) => {
     const details = getPlaceDetails(regionKey, name);
     const address = details?.address?.trim() || '';
+    const sheetNaverUrl = details?.naver_map_url?.trim();
+    const naverUrl = (sheetNaverUrl && sheetNaverUrl.length > 10 && sheetNaverUrl.includes('naver.com'))
+      ? sheetNaverUrl
+      : buildNaverPlaceUrl(name, regionKey, address);
     const placeLat = centerLat + getOffset();
     const placeLng = centerLng + getOffset();
     const distanceKm = haversineKm(lat, lng, placeLat, placeLng);
     const distanceM = Math.round(distanceKm * 1000);
     const distanceText = distanceM >= 1000 ? `${(distanceKm).toFixed(1)}km` : `${distanceM}m`;
     const solo_difficulty_level = Math.min(5, Math.max(1, (index % 5) + 1));
-    const naverUrl = buildNaverPlaceUrl(name, regionKey, address);
     return {
       name,
       regionKey,
@@ -669,7 +684,10 @@ export async function fetchNearbyRecommendation(params) {
   const category = Object.entries(categoryMap).find(([, arr]) => arr.includes(name))?.[0] || '추천';
   const details = getPlaceDetails(regionKey, name);
   const address = details?.address?.trim() || '';
-  const naverUrl = buildNaverPlaceUrl(name, regionKey, address);
+  const sheetNaverUrl = details?.naver_map_url?.trim();
+  const naverUrl = (sheetNaverUrl && sheetNaverUrl.length > 10 && sheetNaverUrl.includes('naver.com'))
+    ? sheetNaverUrl
+    : buildNaverPlaceUrl(name, regionKey, address);
   return new Promise((resolve) => {
     setTimeout(
       () =>
