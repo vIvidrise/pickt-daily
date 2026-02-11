@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { isAppsInTossEnv } from "../utils/appsInTossNav.js";
 import "./Select.css";
 
 export default function Select() {
   const navigate = useNavigate();
   const locationState = useLocation();
   const mode = locationState.state?.mode || 'eat'; // 'eat' or 'do'
+  const useTossNav = isAppsInTossEnv();
 
   const [step, setStep] = useState(1);
   const [form, setForm] = useState({
@@ -51,7 +53,7 @@ export default function Select() {
         title: "어느 지역의 맛집을 추천할까요?",
         type: "list",
         field: "location",
-        data: ["강남·서초·송파", "용산·마포·서대문", "종로·동대문", "성수·건대입구", "관악·영등포"]
+        data: ["강남·서초·송파", "용산·마포·서대문", "종로·동대문", "성수·건대입구", "관악·영등포", "잠실·송파", "성남·분당", "수원", "인천"]
       },
       {
         id: 4,
@@ -102,7 +104,7 @@ export default function Select() {
         title: "어느 지역으로 갈까요?",
         type: "list",
         field: "location",
-        data: ["강남·서초·송파", "용산·마포·서대문", "종로·동대문", "성수·건대입구", "관악·영등포"]
+        data: ["강남·서초·송파", "용산·마포·서대문", "종로·동대문", "성수·건대입구", "관악·영등포", "잠실·송파", "성남·분당", "수원", "인천"]
       },
       {
         id: 4,
@@ -218,11 +220,13 @@ export default function Select() {
 
   return (
     <div className="page select-page">
-      <header className="step-header">
-        <div className="progress-bar-container">
-          <div className="progress-bar" style={{ width: `${progressPercent}%` }}></div>
-        </div>
-      </header>
+      {!useTossNav && (
+        <header className="step-header">
+          <div className="progress-bar-container">
+            <div className="progress-bar" style={{ width: `${progressPercent}%` }}></div>
+          </div>
+        </header>
+      )}
 
       <div className="content-container">
         <h2 className="step-title">{currentStepConfig.title}</h2>

@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { ChevronLeft, X } from "lucide-react";
+import { ChevronLeft, X, Search } from "lucide-react";
 import { closeView } from "../utils/appsInTossSdk.js";
-import { LuckyPlaceSwiper } from "../components/LuckyPlaceSwiper.jsx";
-import { fetchLuckyPlacesNearby } from "../api/gemini.js";
+import { isAppsInTossEnv } from "../utils/appsInTossNav.js";
+import { openNaverMapSearch } from "../utils/naverMapScheme.js";
+import { getLocationNameFromCoords } from "../utils/reverseGeocode.js";
 import "./FortuneResult.css";
 
 const RECOMMEND_MENUS = [
@@ -71,11 +72,7 @@ export default function FortuneResult() {
   const [luckyColor] = useState(() => getRandomColor());
   const [phrase] = useState(() => PHRASES[Math.floor(Math.random() * PHRASES.length)]);
   const [animating, setAnimating] = useState(false);
-
-  const { locationGranted: grantedFromState, locationCoords: coordsFromState } = state || {};
-  const [locationGranted, setLocationGranted] = useState(!!grantedFromState);
-  const [luckyPlaces, setLuckyPlaces] = useState([]);
-  const [luckyPlacesLoading, setLuckyPlacesLoading] = useState(false);
+  const [locationName, setLocationName] = useState("");
 
   useEffect(() => {
     const t = requestAnimationFrame(() => {
@@ -85,31 +82,41 @@ export default function FortuneResult() {
   }, []);
 
   useEffect(() => {
-    if (!grantedFromState || !coordsFromState?.lat || !coordsFromState?.lng || !menu) return;
-    setLuckyPlacesLoading(true);
-    fetchLuckyPlacesNearby({
-      keyword: menu,
-      lat: coordsFromState.lat,
-      lng: coordsFromState.lng,
-    })
-      .then(setLuckyPlaces)
-      .catch(() => setLuckyPlaces([]))
-      .finally(() => setLuckyPlacesLoading(false));
-  }, [grantedFromState, coordsFromState?.lat, coordsFromState?.lng, menu]);
+    const coords = state?.locationCoords;
+    if (coords?.lat != null && coords?.lng != null) {
+      getLocationNameFromCoords(coords.lat, coords.lng).then(setLocationName);
+    }
+  }, [state?.locationCoords?.lat, state?.locationCoords?.lng]);
+
+  const handleSearchNaverMap = () => {
+    const query =
+      locationName.trim()
+        ? `${locationName} ${menu} 맛집`
+        : `근처 ${menu} 맛집`;
+    openNaverMapSearch(query, "");
+  };
+
+  const goHome = () => {
+    closeView(() => navigate("/"));
+    if (!isAppsInTossEnv()) navigate("/");
+  };
 
   const dateStr = getFormattedDate();
+  const useTossNav = isAppsInTossEnv();
 
   return (
     <div className="page fortune-result-page">
-      <header className="fortune-result-header">
-        <button type="button" className="icon-btn" onClick={() => navigate(-1)} aria-label="뒤로가기">
-          <ChevronLeft size={24} color="#191F28" />
-        </button>
-        <span className="fortune-result-header-title">오늘의 운세</span>
-        <button type="button" className="icon-btn" onClick={() => closeView(() => navigate("/"))} aria-label="닫기">
-          <X size={24} color="#4E5968" />
-        </button>
-      </header>
+      {!useTossNav && (
+        <header className="fortune-result-header">
+          <button type="button" className="icon-btn" onClick={() => navigate(-1)} aria-label="뒤로가기">
+            <ChevronLeft size={24} color="#191F28" />
+          </button>
+          <span className="fortune-result-header-title">오늘의 운세</span>
+          <button type="button" className="icon-btn" onClick={() => closeView(() => navigate("/"))} aria-label="닫기">
+            <X size={24} color="#4E5968" />
+          </button>
+        </header>
+      )}
 
       <main className={`fortune-result-scroll ${animating ? "animate" : ""}`}>
         <section className="fortune-card fortune-card-summary">
@@ -149,21 +156,23 @@ export default function FortuneResult() {
           가장 빛나는 하루를 위해 <strong>'{menu}'</strong>를 추천해요.
         </p>
 
-        {locationGranted && (
-          <section className="fortune-lucky-places-section">
-            <h3 className="fortune-lucky-places-title">
-              지금 {name}님 근처의 '{menu}' 행운 장소예요!
-            </h3>
-            {luckyPlacesLoading ? (
-              <div className="fortune-lucky-places-loading">행운 장소를 찾는 중…</div>
-            ) : (
-              <LuckyPlaceSwiper
-                places={luckyPlaces}
-                emptyMessage="근처에 추천 장소가 없어요. 다른 지역에서 확인해 보세요!"
-              />
-            )}
-          </section>
-        )}
+        <section className="fortune-naver-search-section">
+          <button
+            type="button"
+            className="fortune-naver-search-btn"
+            onClick={handleSearchNaverMap}
+          >
+            <Search size={20} color="#fff" strokeWidth={2.5} />
+            <span>{menu} 맛집 찾아보기</span>
+          </button>
+          <button
+            type="button"
+            className="fortune-main-btn fortune-confirm-btn"
+            onClick={goHome}
+          >
+            <span>확인</span>
+          </button>
+        </section>
       </main>
     </div>
   );

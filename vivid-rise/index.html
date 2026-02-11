@@ -27,7 +27,10 @@
     <!-- 네이버 지도: Result 페이지에서 loadNaverMapScript()로 로드 (naverMapLoader.js). NCP 웹 서비스 URL에 실서비스 도메인 등록 필수 -->
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <div id="app-loading" style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:sans-serif;color:#666;">로딩 중…</div>
+    </div>
+    <noscript>JavaScript를 켜 주세요. 이 앱은 JavaScript가 필요합니다.</noscript>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

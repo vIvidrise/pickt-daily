@@ -14,7 +14,7 @@
     overflow: hidden;
   }
 
-  /* 홈 화면(HOME)일 때만 전체 스크롤 가능 — 찜한 장소·랭킹까지 밑으로 내려가게 */
+  /* 홈 화면(HOME)일 때만 전체 스크롤 가능 — 랭킹까지 밑으로 내려가게 */
   .home-page .home-scroll-wrap {
     flex: 1;
     min-height: 0;
@@ -80,8 +80,8 @@
   .fortune-banner-img {
     width: 100%; height: auto; display: block; vertical-align: top;
   }
-  
-  /* 찜한 장소 (스크롤 영역 안) */
+
+  /* 찜한 장소 (메인 + 나만의 리스트 둘 다 노출) */
   .home-scroll-wrap .favorites-section { padding: 16px 20px; }
   .favorites-title { font-size: 18px; font-weight: 700; color: #191F28; margin-bottom: 12px; }
   .favorites-list { display: flex; flex-direction: column; gap: 10px; }
@@ -218,6 +218,7 @@
   .grid-label { font-size: 15px; font-weight: 600; color: #333D4B; }
   .grid-select-btn.selected .grid-label { color: #3182F6; }
   .list-select-container { display: flex; flex-direction: column; gap: 16px; }
+  .list-select-container.region-list { max-height: 60vh; overflow-y: auto; -webkit-overflow-scrolling: touch; }
   .list-select-btn { width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 20px 0; border: none; border-bottom: 1px solid #F2F4F6; background: none; cursor: pointer; }
   .list-left { display: flex; align-items: center; gap: 10px; }
   .list-icon { font-size: 20px; }

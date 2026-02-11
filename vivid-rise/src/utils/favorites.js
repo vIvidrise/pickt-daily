@@ -51,33 +51,46 @@ export function getFavorites() {
   }
 }
 
-/** 찜 목록에 있는지 (name + naverUrl 기준) */
+/** place.id 또는 (name + naverUrl) 기준으로 찜 여부 판단 */
 export function isFavorited(place, list) {
-  if (!place?.name || !place?.naverUrl) return false;
   const arr = list != null ? list : getFavorites();
-  return arr.some((p) => p.name === place.name && p.naverUrl === place.naverUrl);
+  const idA = place?.id;
+  const naverUrl = place?.naverUrl ?? place?.naver_map_url;
+  if (idA != null) {
+    return arr.some((p) => String(p.id) === String(idA));
+  }
+  if (place?.name && naverUrl) {
+    return arr.some((p) => p.name === place.name && (p.naverUrl || p.naver_map_url) === naverUrl);
+  }
+  return false;
 }
 
 function serialize(list) {
   return JSON.stringify(list);
 }
 
-/** 찜하기 추가. 앱인토스에서는 Promise 반환. */
+/** 찜하기 추가. name 필수, id 또는 naverUrl 있으면 저장. Saved에서 id로 places.ts와 매칭. */
 export function addFavorite(place) {
-  if (!place?.name || !place?.naverUrl) return Promise.resolve();
+  if (!place?.name) return Promise.resolve();
+  const naverUrl = (place?.naverUrl ?? place?.naver_map_url) || "";
+  const idA = place.id;
+  if (idA == null && !naverUrl) return Promise.resolve();
   const Storage = getStorage();
   const list = getFavorites();
-  if (list.some((p) => p.name === place.name && p.naverUrl === place.naverUrl))
-    return Promise.resolve();
+  const already =
+    (idA != null && list.some((p) => String(p.id) === String(idA))) ||
+    (naverUrl && list.some((p) => p.name === place.name && (p.naverUrl || p.naver_map_url) === naverUrl));
+  if (already) return Promise.resolve();
   const next = [
     ...list,
     {
+      id: idA ?? null,
       name: place.name,
       emoji: place.emoji || "📍",
-      naverUrl: place.naverUrl,
+      naverUrl: naverUrl,
       tag: place.tag || "",
       address: place.address || "",
-      /** 'eat' = 오늘 뭐 먹지에서 찜, 'do' = 오늘 뭐 하지에서 찜 (나의 찜한 코스용) */
+      imageUrl: place.imageUrl || "",
       type: place.type ?? null,
       lat: place.lat ?? null,
       lng: place.lng ?? null,
@@ -95,13 +108,16 @@ export function addFavorite(place) {
   return Promise.resolve();
 }
 
-/** 찜 해제. 앱인토스에서는 Promise 반환. */
+/** 찜 해제. id 또는 name+naverUrl 기준. */
 export function removeFavorite(place) {
-  if (!place?.name || !place?.naverUrl) return Promise.resolve();
+  const naverUrl = place?.naverUrl ?? place?.naver_map_url;
   const Storage = getStorage();
-  const list = getFavorites().filter(
-    (p) => !(p.name === place.name && p.naverUrl === place.naverUrl)
-  );
+  const list = getFavorites().filter((p) => {
+    if (place?.id != null && String(p.id) === String(place.id)) return false;
+    if (place?.name && naverUrl && p.name === place.name && (p.naverUrl || p.naver_map_url) === naverUrl) return false;
+    return true;
+  });
+  if (list.length === getFavorites().length) return Promise.resolve();
   if (Storage) {
     cache = list;
     return getStorageAdapter().setItem(STORAGE_KEY, serialize(list));

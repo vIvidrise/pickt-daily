@@ -8,9 +8,16 @@
 const getPartner = () => typeof window !== 'undefined' && window.partner;
 const getTdsEvent = () => typeof window !== 'undefined' && window.tdsEvent;
 
-/** 토스 앱인토스 WebView 안에서 실행 중인지 여부 */
+/** 토스 미니앱 도메인 여부 (검토/실서비스 WebView에서 플랫폼 공통 바 사용) */
+function isTossMiniAppHost() {
+  if (typeof window === 'undefined' || !window.location?.hostname) return false;
+  const h = window.location.hostname.toLowerCase();
+  return /tossmini\.com|private-apps\.tossmini|apps\.toss\.im/i.test(h);
+}
+
+/** 토스 앱인토스 WebView 안에서 실행 중인지 여부 (자체 헤더 제거 시 사용) */
 export function isAppsInTossEnv() {
-  return !!(getPartner() && getTdsEvent());
+  return !!(getPartner() && getTdsEvent()) || isTossMiniAppHost();
 }
 
 /**

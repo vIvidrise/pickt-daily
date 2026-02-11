@@ -151,6 +151,22 @@
   object-fit: contain;
 }
 
+/* 코스 카드 장소 썸네일 (imageUrl 있을 때) */
+.course-card-place-img-wrap {
+  margin-top: 8px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #e4e4e7;
+  aspect-ratio: 16 / 10;
+  max-height: 100px;
+}
+
+.course-card-place-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
 /* Swiper 네비게이션 버튼 (선택) */
 .course-swiper .swiper-button-prev,
 .course-swiper .swiper-button-next {

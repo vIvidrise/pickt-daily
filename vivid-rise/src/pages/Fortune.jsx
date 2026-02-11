@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
+import { isAppsInTossEnv } from "../utils/appsInTossNav.js";
 import { ChevronLeft, X } from "lucide-react";
 import { closeView } from "../utils/appsInTossSdk.js";
 import { LocationPermissionModal } from "../components/LocationPermissionModal.jsx";
@@ -75,19 +76,23 @@ export default function Fortune() {
     />
   ) : null;
 
+  const useTossNav = isAppsInTossEnv();
+
   return (
     <div className="page fortune-page">
       {modalEl && createPortal(modalEl, document.body)}
 
-      <header className="fortune-header">
-        <button type="button" className="icon-btn" onClick={() => navigate(-1)} aria-label="뒤로가기">
-          <ChevronLeft size={24} color="#191F28" />
-        </button>
-        <span className="fortune-header-title">오늘 내 운세</span>
-        <button type="button" className="icon-btn" onClick={() => closeView(() => navigate("/"))} aria-label="닫기">
-          <X size={24} color="#B0B8C1" />
-        </button>
-      </header>
+      {!useTossNav && (
+        <header className="fortune-header">
+          <button type="button" className="icon-btn" onClick={() => navigate(-1)} aria-label="뒤로가기">
+            <ChevronLeft size={24} color="#191F28" />
+          </button>
+          <span className="fortune-header-title">오늘 내 운세</span>
+          <button type="button" className="icon-btn" onClick={() => closeView(() => navigate("/"))} aria-label="닫기">
+            <X size={24} color="#B0B8C1" />
+          </button>
+        </header>
+      )}
 
       <form className="fortune-form" onSubmit={handleSubmit}>
         <div className="fortune-field">

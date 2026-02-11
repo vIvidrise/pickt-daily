@@ -379,7 +379,14 @@
     display: flex; align-items: center;
   }
   .notice-text { font-size: 14px; color: #4E5968; line-height: 1.5; margin: 0; }
-  
+
+  .place-address-box {
+    display: flex; flex-direction: column; gap: 4px;
+    padding: 12px 16px; background: #F5F6F8; border-radius: 12px;
+  }
+  .place-address-label { font-size: 12px; color: #8B95A1; font-weight: 600; }
+  .place-address-value { font-size: 14px; color: #191F28; line-height: 1.4; }
+
   /* 보관함 저장 버튼 */
   .btn-save-cloud {
     width: 100%;
@@ -407,8 +414,19 @@
   }
 
   /* 하단: 네이버 플레이스 버튼 */
+  .sheet-map-actions {
+    display: flex; gap: 10px; width: 100%;
+  }
+  .btn-directions {
+    flex: 0 0 auto; min-width: 100px; height: 52px;
+    background: #3182F6; color: white;
+    border: none; border-radius: 12px;
+    font-size: 15px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+    cursor: pointer;
+  }
   .btn-naver {
-    width: 100%; height: 52px;
+    flex: 1; min-width: 0; height: 52px;
     background-color: #03C75A; /* 네이버 그린 */
     color: white;
     border: none; border-radius: 12px;

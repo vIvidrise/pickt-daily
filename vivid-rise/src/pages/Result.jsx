@@ -3,9 +3,11 @@ import { useLocation, useNavigate } from "react-router-dom";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { fetchRecommendations } from "../api/gemini.js";
+import { fetchPlaceFromNaver, toNaverMapPlaceEntryUrl, toNaverPlaceDetailUrl } from "../api/naverPlaceApi.js";
 import { isFavorited, addFavorite, removeFavorite, getFavorites } from "../utils/favorites.js";
 import { isAppsInTossEnv, addAccessoryButton } from "../utils/appsInTossNav.js";
-import { closeView, openExternalUrl } from "../utils/appsInTossSdk.js";
+import { closeView } from "../utils/appsInTossSdk.js";
+import { openNaverMapSearch, openNaverMapRoute, openNaverMapPlaceUrl } from "../utils/naverMapScheme.js";
 import { loadNaverMapScript } from "../utils/naverMapLoader.js";
 import "./Result.css";
 
@@ -46,12 +48,19 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
 });
 
+/** 길찾기 버튼 노출 여부 (lat, lng 있으면 표시) */
+function hasRouteData(lat, lng) {
+  return lat != null && lng != null;
+}
+
 export default function Result() {
   const { state } = useLocation();
   const navigate = useNavigate();
   const mapElement = useRef(null);
   const leafletMapRef = useRef(null);
   const leafletMapInstance = useRef(null);
+  const naverMapRef = useRef(null);
+  const naverMapBoundsRef = useRef(null);
 
   const [list, setList] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -60,6 +69,8 @@ export default function Result() {
   const [mapError, setMapError] = useState(false);
   const [mapReady, setMapReady] = useState(false);
   const [favorited, setFavorited] = useState(false);
+  const [selectedPlaceNaverLink, setSelectedPlaceNaverLink] = useState('');
+  const useTossNav = isAppsInTossEnv();
 
   const isDoMode = state?.mode === 'do';
 
@@ -67,16 +78,43 @@ export default function Result() {
     if (selectedPlace) setFavorited(isFavorited(selectedPlace, getFavorites()));
   }, [selectedPlace]);
 
+  // 선택한 가게의 네이버 URL → 데이터에 naver_map_url 있으면 우선 사용, 없으면 API로 조회
+  useEffect(() => {
+    if (!selectedPlace?.name) {
+      setSelectedPlaceNaverLink('');
+      return;
+    }
+    if (selectedPlace.naver_map_url && selectedPlace.naver_map_url.trim()) {
+      setSelectedPlaceNaverLink(selectedPlace.naver_map_url.trim());
+      return;
+    }
+    const region = state?.region || '';
+    fetchPlaceFromNaver(selectedPlace.name, region)
+      .then((data) => {
+        const placeDetail = data?.link ? toNaverPlaceDetailUrl(data.link) : '';
+        const mapEntry = data?.link ? toNaverMapPlaceEntryUrl(data.link) : '';
+        setSelectedPlaceNaverLink(placeDetail || mapEntry || '');
+      })
+      .catch(() => setSelectedPlaceNaverLink(''));
+  }, [selectedPlace?.name, selectedPlace?.naver_map_url, state?.region]);
+
   const toggleFavorite = () => {
     if (!selectedPlace) return;
+    const naverUrl =
+      selectedPlace.naver_map_url ||
+      selectedPlace.naverUrl ||
+      selectedPlaceNaverLink;
     const placeWithType = {
       ...selectedPlace,
+      id: selectedPlace.id,
+      naverUrl,
+      naver_map_url: selectedPlace.naver_map_url || naverUrl,
       type: isDoMode ? "do" : "eat",
       lat: selectedPlace.lat,
       lng: selectedPlace.lng ?? selectedPlace.left,
     };
     if (favorited) {
-      removeFavorite(selectedPlace).then(() => setFavorited(false));
+      removeFavorite(placeWithType).then(() => setFavorited(false));
     } else {
       addFavorite(placeWithType).then(() => setFavorited(true));
     }
@@ -91,10 +129,32 @@ export default function Result() {
 
   useEffect(() => {
     const searchParams = state || { mode: 'eat', region: '강남·서초' };
-    fetchRecommendations(searchParams).then(data => {
-      setList(data || []);
-      setLoading(false);
-    });
+    const region = searchParams.region || '';
+    fetchRecommendations(searchParams)
+      .then(async (data) => {
+        if (!data?.length) {
+          setList([]);
+          setLoading(false);
+          return;
+        }
+        const enriched = await Promise.all(
+          data.map(async (p) => {
+            try {
+              const res = await fetchPlaceFromNaver(p.name, region);
+              const realAddress = res.roadAddress || res.address || p.address;
+              return { ...p, address: realAddress };
+            } catch {
+              return p;
+            }
+          })
+        );
+        setList(enriched);
+        setLoading(false);
+      })
+      .catch(() => {
+        setList([]);
+        setLoading(false);
+      });
   }, [state]);
 
   // 네이버 지도: 스크립트를 명시적으로 로드한 뒤 초기화 (실서비스 도메인 NCP 등록 필수)
@@ -120,6 +180,7 @@ export default function Result() {
             zoom: 15,
             scaleControl: false, mapDataControl: false, logoControl: false,
           });
+          naverMapRef.current = map;
 
           const markers = [];
           list.forEach((item) => {
@@ -152,16 +213,37 @@ export default function Result() {
               const currentEl = marker.getElement()?.querySelector('.pin-shape');
               if (currentEl) currentEl.classList.add('active-pin');
               map.panTo(marker.getPosition());
+              map.setZoom(17);
             });
             markers.push(marker);
           });
+          // 추천 장소 전체가 보이도록 지도 영역 맞춤 (앱인토스 지도 연동)
+          if (markers.length > 0) {
+            const bounds = new naver.maps.LatLngBounds(
+              new naver.maps.LatLng(Math.min(...list.map((i) => i.lat).filter(Number.isFinite)) - 0.005, Math.min(...list.map((i) => i.lng ?? i.left).filter(Number.isFinite)) - 0.005),
+              new naver.maps.LatLng(Math.max(...list.map((i) => i.lat).filter(Number.isFinite)) + 0.005, Math.max(...list.map((i) => i.lng ?? i.left).filter(Number.isFinite)) + 0.005)
+            );
+            naverMapBoundsRef.current = bounds;
+            try {
+              map.fitBounds(bounds, { top: 60, right: 20, bottom: 20, left: 20 });
+            } catch (_) {
+              map.setCenter(new naver.maps.LatLng(centerLat, centerLng));
+              map.setZoom(15);
+            }
+          }
           if (!cancelled) setMapReady(true);
 
           // 네이버 인증 실패 시 컨테이너에 에러 메시지가 뜨는 경우 감지 → Leaflet으로 전환
           authErrorTimer = setTimeout(() => {
             if (cancelled || !mapElement.current) return;
             const el = mapElement.current;
-            const hasAuthError = el.textContent?.includes("인증이 실패") || el.textContent?.includes("Open API 인증");
+            const text = el.textContent ?? "";
+            const hasAuthError =
+              text.includes("인증이 실패") ||
+              text.includes("Open API 인증") ||
+              text.includes("허용되지 않았습니다") ||
+              text.includes("등록되지 않은") ||
+              (text.includes("Client") && text.includes("등록"));
             if (hasAuthError) {
               console.warn("네이버 지도 인증 실패 감지 → Leaflet으로 전환. NCP 콘솔에서 웹 서비스 URL 등록을 확인하세요.");
               setMapError(true);
@@ -182,6 +264,18 @@ export default function Result() {
       if (authErrorTimer) clearTimeout(authErrorTimer);
     };
   }, [loading, list, isDoMode]);
+
+  // 가게 선택 해제 시 지도 다시 전체 보기로
+  useEffect(() => {
+    if (selectedPlace !== null) return;
+    const map = naverMapRef.current;
+    const bounds = naverMapBoundsRef.current;
+    if (map && bounds) {
+      try {
+        map.fitBounds(bounds, { top: 60, right: 20, bottom: 20, left: 20 });
+      } catch (_) {}
+    }
+  }, [selectedPlace]);
 
   // 네이버 지도 실패 시 Leaflet(OpenStreetMap)으로 표시 — API 키/URL 등록 불필요
   useEffect(() => {
@@ -248,6 +342,18 @@ export default function Result() {
       ) : (
         <>
           <div ref={mapElement} className="map-container"></div>
+          {mapReady && (
+            <div
+              className="map-provider-badge map-provider-naver"
+              style={{
+                position: 'absolute', bottom: 100, left: '50%', transform: 'translateX(-50%)',
+                zIndex: 1, padding: '6px 12px', fontSize: 12, borderRadius: 20,
+                boxShadow: '0 1px 3px rgba(0,0,0,0.12)', color: '#fff', background: '#03C75A',
+              }}
+            >
+              네이버 지도
+            </div>
+          )}
           {/* 혼밥 랭킹 범례 (오늘 뭐 먹지 결과일 때만) */}
           {!isDoMode && list.length > 0 && (
             <div className="map-legend" aria-label="혼밥 랭킹">
@@ -261,18 +367,20 @@ export default function Result() {
         </>
       )}
 
-      {/* 헤더 (이모지 버전) */}
-      <div className="map-header">
-        <button type="button" className="icon-btn" onClick={() => navigate(-1)} style={{fontSize:'24px'}} aria-label="뒤로가기">⬅️</button>
-        <div className="header-center">
-          <img src="/logo.png" alt="" className="header-logo" aria-hidden="true" />
-          <span className="header-title">요즘 뭐 함</span>
+      {/* 토스 웹뷰가 아닐 때만 자체 헤더 표시 (플랫폼 공통 바 사용) */}
+      {!useTossNav && (
+        <div className="map-header">
+          <button type="button" className="icon-btn" onClick={() => navigate(-1)} style={{fontSize:'24px'}} aria-label="뒤로가기">⬅️</button>
+          <div className="header-center">
+            <img src="/logo.png" alt="" className="header-logo" aria-hidden="true" />
+            <span className="header-title">요즘 뭐 함</span>
+          </div>
+          <div className="header-right">
+              <button type="button" className="icon-btn" style={{fontSize:'24px'}} aria-label="더보기">┄</button>
+              <button type="button" className="icon-btn" onClick={() => closeView(() => navigate("/"))} style={{fontSize:'24px'}} aria-label="닫기">✖️</button>
+          </div>
         </div>
-        <div className="header-right">
-            <button type="button" className="icon-btn" style={{fontSize:'24px'}} aria-label="더보기">┄</button>
-            <button type="button" className="icon-btn" onClick={() => closeView(() => navigate("/"))} style={{fontSize:'24px'}} aria-label="닫기">✖️</button>
-        </div>
-      </div>
+      )}
 
       {!showCourseList && !selectedPlace && (
         <div className="bottom-floating-area">
@@ -317,13 +425,40 @@ export default function Result() {
               </div>
             )}
 
+            {selectedPlace.address && (
+              <div className="place-address-box">
+                <span className="place-address-label">📍 주소</span>
+                <span className="place-address-value">{selectedPlace.address}</span>
+              </div>
+            )}
+
             <div className="notice-box">
               <p className="notice-text">{selectedPlace.notice}</p>
             </div>
 
-            <button className="btn-naver" onClick={() => openExternalUrl(selectedPlace.naverUrl)}>
-              <span className="naver-n">N</span> 네이버 플레이스에서 보기
-            </button>
+            <div className="sheet-map-actions">
+              {hasRouteData(selectedPlace.lat, selectedPlace.lng ?? selectedPlace.left) && (
+                <button
+                  type="button"
+                  className="btn-directions"
+                  onClick={() => openNaverMapRoute(selectedPlace.lat, selectedPlace.lng ?? selectedPlace.left, selectedPlace.name)}
+                >
+                  🧭 길찾기
+                </button>
+              )}
+              <button
+                className="btn-naver"
+                onClick={() => {
+                  if (selectedPlaceNaverLink) {
+                    openNaverMapPlaceUrl(selectedPlaceNaverLink);
+                  } else {
+                    openNaverMapSearch(selectedPlace.name, state?.region);
+                  }
+                }}
+              >
+                <span className="naver-n">N</span> 네이버에서 보기
+              </button>
+            </div>
           </div>
         </>
       )}

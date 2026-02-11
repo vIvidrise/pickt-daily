@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, Component } from "react";
 import { HashRouter, Routes, Route, useNavigate } from "react-router-dom";
 import Home from "./pages/Home";
 import Select from "./pages/Select";
@@ -12,6 +12,29 @@ import { getSafeAreaInsets, subscribeSafeArea, applySafeAreaToRoot } from "./uti
 import { subscribeBackEvent, subscribeEntryMessageExited } from "./utils/appsInTossSdk";
 import { loadFavoritesCache } from "./utils/favorites";
 import "./App.css";
+
+/** 에러 시 흰 화면 대신 메시지 표시 */
+class AppErrorBoundary extends Component {
+  state = { hasError: false, error: null };
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+  componentDidCatch(err, info) {
+    console.error("AppErrorBoundary:", err, info);
+  }
+  render() {
+    if (this.state.hasError && this.state.error) {
+      return (
+        <div style={{ padding: 20, fontFamily: "sans-serif", background: "#f5f5f5", minHeight: "100vh", boxSizing: "border-box" }}>
+          <h2 style={{ color: "#333" }}>화면을 불러오지 못했어요</h2>
+          <pre style={{ whiteSpace: "pre-wrap", fontSize: 12, color: "#666" }}>{this.state.error?.message ?? String(this.state.error)}</pre>
+          <button type="button" onClick={() => window.location.reload()} style={{ marginTop: 12, padding: "8px 16px" }}>새로고침</button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
 
 /** 앱인토스 이벤트 구독: 뒤로가기 시 히스토리 백, 진입 완료 시 찜 캐시 로드 */
 function TossEventSubscriber({ useTossNav, children }) {
@@ -52,21 +75,23 @@ function App() {
   }, [useTossNav]);
 
   return (
-    <HashRouter>
-      <div className={`app-container ${useTossNav ? "use-toss-nav" : ""}`}>
-        <TossEventSubscriber useTossNav={useTossNav}>
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/select" element={<Select />} />
-            <Route path="/confirm" element={<Confirm />} />
-            <Route path="/result" element={<Result />} />
-            <Route path="/saved" element={<Saved />} />
-            <Route path="/fortune" element={<Fortune />} />
-            <Route path="/fortune/result" element={<FortuneResult />} />
-          </Routes>
-        </TossEventSubscriber>
-      </div>
-    </HashRouter>
+    <AppErrorBoundary>
+      <HashRouter>
+        <div className={`app-container ${useTossNav ? "use-toss-nav" : ""}`}>
+          <TossEventSubscriber useTossNav={useTossNav}>
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/select" element={<Select />} />
+              <Route path="/confirm" element={<Confirm />} />
+              <Route path="/result" element={<Result />} />
+              <Route path="/saved" element={<Saved />} />
+              <Route path="/fortune" element={<Fortune />} />
+              <Route path="/fortune/result" element={<FortuneResult />} />
+            </Routes>
+          </TossEventSubscriber>
+        </div>
+      </HashRouter>
+    </AppErrorBoundary>
   );
 }
 

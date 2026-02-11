@@ -89,16 +89,19 @@ export function closeView(onFallback) {
 
 /**
  * 외부 URL 열기. 앱인토스에서는 openURL(), 그 외에는 window.open.
+ * URL이 없거나 유효하지 않으면 호출하지 않음.
  */
 export function openExternalUrl(url) {
+  const u = url != null ? String(url).trim() : '';
+  if (!u || (!u.startsWith('http://') && !u.startsWith('https://') && !u.startsWith('nmap://'))) return;
   const open = getOpenURL();
   if (open && typeof open === 'function') {
-    open(url).catch(() => {
-      win?.open?.(url, '_blank');
+    open(u).catch(() => {
+      win?.open?.(u, '_blank');
     });
     return;
   }
-  win?.open?.(url, '_blank');
+  win?.open?.(u, '_blank');
 }
 
 /**

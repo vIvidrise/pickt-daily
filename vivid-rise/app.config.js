@@ -21,11 +21,12 @@ const navigationBar = {
 
 /** 앱인토스 CLI에서 사용할 수 있도록 동일 형태의 설정 객체 export */
 export default {
-  appName: 'vivid-rise',
+  appName: 'pickt-daily', // 콘솔에 등록한 앱 ID와 동일
   brand: {
-    displayName: '요즘 뭐 함',
-    primaryColor: '#3182F6',
-    icon: '/logo.png', // 배포 시 콘솔에 업로드한 이미지 절대 URL로 교체 권장
+    displayName: '요즘 뭐 함', // 사용자에게 노출될 앱 이름 (콘솔과 동일)
+    primaryColor: '#3182F6', // 앱 기본 색상(hex), 버튼 등에 적용
+    icon: 'https://static.toss.im/appsintoss/17423/a90bb6b4-e696-4311-b778-26b83348ff46.png', // 기본 모드
+    iconDark: 'https://static.toss.im/appsintoss/17423/565b11f0-5433-4b65-8005-a83d5fcdede7.png', // 다크모드 로고
   },
   web: {
     host: 'localhost',

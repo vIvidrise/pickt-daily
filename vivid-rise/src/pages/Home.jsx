@@ -2,11 +2,16 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ChevronLeft, MoreHorizontal, X, Check } from "lucide-react";
 import { getFavorites, removeFavorite, loadFavoritesCache } from "../utils/favorites.js";
-import { closeView, openExternalUrl } from "../utils/appsInTossSdk.js";
+import { closeView } from "../utils/appsInTossSdk.js";
+import { openNaverMapSearch } from "../utils/naverMapScheme.js";
+import { isAppsInTossEnv } from "../utils/appsInTossNav.js";
 import "./Home.css";
 
 /** ranking_type: solo_master | quick_lunch | solo_night (API 파라미터용) */
 export const RANKING_TYPE = { SOLO_MASTER: 'solo_master', QUICK_LUNCH: 'quick_lunch', SOLO_NIGHT: 'solo_night' };
+
+/** 홈 지역 선택 옵션 — gemini.js BASE_DB 키와 동일하게 유지 */
+const REGION_OPTIONS = ['강남·서초', '용산·이태원', '종로·을지로', '성수·건대', '홍대·연남', '잠실·송파', '성남·분당', '수원', '인천'];
 
 /** solo_difficulty_level(1~5) → 힙한 태그 텍스트 */
 export function getSoloLevelTag(level) {
@@ -45,6 +50,7 @@ const RANKING_ITEMS_BY_TYPE = {
 
 export default function Home() {
   const navigate = useNavigate();
+  const useTossNav = isAppsInTossEnv();
 
   // 단계: HOME -> INTRO -> MENU -> OCCASION -> REGION -> FACILITY -> SUMMARY -> LOADING
   const [currentScreen, setCurrentScreen] = useState('HOME');
@@ -59,7 +65,7 @@ export default function Home() {
   const [rankingType, setRankingType] = useState(RANKING_TYPE.SOLO_MASTER);
 
   useEffect(() => {
-    if (currentScreen === 'HOME') {
+    if (currentScreen === "HOME") {
       loadFavoritesCache().then(() => setFavorites(getFavorites()));
     }
   }, [currentScreen]);
@@ -147,10 +153,10 @@ export default function Home() {
   return (
     <div className="page home-page">
       
-      {/* 1. 홈 화면 — 전체 스크롤로 찜한 장소·랭킹까지 밑으로 내려가게 */}
+      {/* 1. 홈 화면 — 전체 스크롤로 랭킹까지 밑으로 내려가게 */}
       {currentScreen === 'HOME' && (
         <>
-          <Header onBack={()=>{}} hideBack onClose={() => closeView(() => navigate("/"))} />
+          {!useTossNav && <Header onBack={()=>{}} hideBack onClose={() => closeView(() => navigate("/"))} />}
           <div className="home-scroll-wrap">
             <div className="main-section">
               <h1 className="main-title">남들은<br />뭘 선택했을까?</h1>
@@ -180,17 +186,28 @@ export default function Home() {
                 <h2 className="favorites-title">❤️ 찜한 장소</h2>
                 <div className="favorites-list">
                   {favorites.map((item, i) => (
-                    <div key={`${item.name}-${i}`} className="favorite-item">
-                      <span className="favorite-emoji">{item.emoji}</span>
+                    <div key={`${item.name}-${item.id ?? i}`} className="favorite-item">
+                      <span className="favorite-emoji">{item.emoji || "📍"}</span>
                       <div className="favorite-info">
                         <span className="favorite-name">{item.name}</span>
                         {item.tag && <span className="favorite-tag">{item.tag}</span>}
                       </div>
                       <div className="favorite-actions">
-                        <button type="button" className="favorite-link" onClick={() => openExternalUrl(item.naverUrl)}>
+                        <button
+                          type="button"
+                          className="favorite-link"
+                          onClick={() => openNaverMapSearch(item.name, item.regionKey || "")}
+                        >
                           네이버에서 보기
                         </button>
-                        <button type="button" className="favorite-remove" onClick={() => { removeFavorite(item).then(() => setFavorites(getFavorites())); }} aria-label="찜 해제">
+                        <button
+                          type="button"
+                          className="favorite-remove"
+                          onClick={() => {
+                            removeFavorite(item).then(() => setFavorites(getFavorites()));
+                          }}
+                          aria-label="찜 해제"
+                        >
                           ✕
                         </button>
                       </div>
@@ -227,7 +244,7 @@ export default function Home() {
       {/* 2. 인트로 */}
       {currentScreen === 'INTRO' && (
         <div className="flow-container">
-          <Header onBack={goBack} onClose={() => closeView(() => navigate("/"))} />
+          {!useTossNav && <Header onBack={goBack} onClose={() => closeView(() => navigate("/"))} />}
           <div className="intro-content">
             <h1 className="flow-title">{mode === 'eat' ? "우리 동네 맛집은" : "우리 동네 놀거리는"} <br/> 요즘 뭐 함 에서</h1>
             <p className="flow-subtitle">내 취향에 딱 맞는 곳을 추천해줘요</p>
@@ -244,26 +261,26 @@ export default function Home() {
       )}
 
       {/* EAT FLOW */}
-      {currentScreen === 'MENU' && <StepLayout title="어떤 메뉴를 좋아하나요?" subtitle="1개만 골라주세요" progress={getProgress()} onBack={goBack} onNext={goNext} disabled={!selections.menu}><div className="selection-grid-4">{['한식','일식','양식','중식','분식','멕시칸','샐러드','디저트'].map((item,i)=><GridButton key={i} label={item} emoji={['🥘','🍣','🍔','🥟','🍢','🌮','🥗','🍰'][i]} selected={selections.menu===item} onClick={()=>handleSelect('menu',item)}/>)}</div></StepLayout>}
+      {currentScreen === 'MENU' && <StepLayout useTossNav={useTossNav} title="어떤 메뉴를 좋아하나요?" subtitle="1개만 골라주세요" progress={getProgress()} onBack={goBack} onNext={goNext} disabled={!selections.menu}><div className="selection-grid-4">{['한식','일식','양식','중식','분식','멕시칸','샐러드','디저트'].map((item,i)=><GridButton key={i} label={item} emoji={['🥘','🍣','🍔','🥟','🍢','🌮','🥗','🍰'][i]} selected={selections.menu===item} onClick={()=>handleSelect('menu',item)}/>)}</div></StepLayout>}
       
-      {currentScreen === 'OCCASION' && <StepLayout title="오늘 어떤 날인가요?" subtitle="상황에 맞게 추천해드려요" progress={getProgress()} onBack={goBack} onNext={goNext} disabled={!selections.occasion}><div className="selection-grid-4">{['기념일','데이트','가족모임','혼자서','트렌디한','한국적인','SNS 핫플','동네맛집'].map((item,i)=><GridButton key={i} label={item} emoji={['🎉','💕','👨‍👩‍👧‍👦','👤','✨','🇰🇷','🔥','🏠'][i]} selected={selections.occasion===item} onClick={()=>handleSelect('occasion',item)}/>)}</div></StepLayout>}
+      {currentScreen === 'OCCASION' && <StepLayout useTossNav={useTossNav} title="오늘 어떤 날인가요?" subtitle="상황에 맞게 추천해드려요" progress={getProgress()} onBack={goBack} onNext={goNext} disabled={!selections.occasion}><div className="selection-grid-4">{['기념일','데이트','가족모임','혼자서','트렌디한','한국적인','SNS 핫플','동네맛집'].map((item,i)=><GridButton key={i} label={item} emoji={['🎉','💕','👨‍👩‍👧‍👦','👤','✨','🇰🇷','🔥','🏠'][i]} selected={selections.occasion===item} onClick={()=>handleSelect('occasion',item)}/>)}</div></StepLayout>}
       
-      {currentScreen === 'FACILITY' && <StepLayout title="필요한 시설이 있나요?" subtitle="여러 개 선택 가능해요" progress={getProgress()} btnText="완료" onBack={goBack} onNext={goNext} disabled={false}><div className="list-select-container">{[{l:'주차',i:'🅿️'},{l:'예약',i:'📅'},{l:'무선 인터넷',i:'🛜'},{l:'반려동물',i:'🐶'}].map((item,i)=><ListButton key={i} label={item.l} icon={item.i} selected={selections.facility.includes(item.l)} onClick={()=>handleMultiSelect(item.l)}/>)}</div></StepLayout>}
+      {currentScreen === 'FACILITY' && <StepLayout useTossNav={useTossNav} title="필요한 시설이 있나요?" subtitle="여러 개 선택 가능해요" progress={getProgress()} btnText="완료" onBack={goBack} onNext={goNext} disabled={false}><div className="list-select-container">{[{l:'주차',i:'🅿️'},{l:'예약',i:'📅'},{l:'무선 인터넷',i:'🛜'},{l:'반려동물',i:'🐶'}].map((item,i)=><ListButton key={i} label={item.l} icon={item.i} selected={selections.facility.includes(item.l)} onClick={()=>handleMultiSelect(item.l)}/>)}</div></StepLayout>}
 
       {/* DO FLOW */}
-      {currentScreen === 'COMPANION' && <StepLayout title="누구와 함께 하나요?" subtitle="동행을 선택해주세요" progress={getProgress()} onBack={goBack} onNext={goNext} disabled={!selections.companion}><div className="selection-grid-list-style">{['연인','친구','가족','혼자'].map((item,i)=><GridButton key={i} label={item} emoji={['❤️','🎒','👨‍👩‍👧‍👦','🧢'][i]} selected={selections.companion===item} onClick={()=>handleSelect('companion',item)}/>)}</div></StepLayout>}
+      {currentScreen === 'COMPANION' && <StepLayout useTossNav={useTossNav} title="누구와 함께 하나요?" subtitle="동행을 선택해주세요" progress={getProgress()} onBack={goBack} onNext={goNext} disabled={!selections.companion}><div className="selection-grid-list-style">{['연인','친구','가족','혼자'].map((item,i)=><GridButton key={i} label={item} emoji={['❤️','🎒','👨‍👩‍👧‍👦','🧢'][i]} selected={selections.companion===item} onClick={()=>handleSelect('companion',item)}/>)}</div></StepLayout>}
       
-      {currentScreen === 'MOOD' && <StepLayout title="어떤 무드를 원하시나요?" subtitle="테마를 골라주세요" progress={getProgress()} onBack={goBack} onNext={goNext} disabled={!selections.mood}><div className="selection-grid-list-style">{['힐링·산책','활동·이색','문화·전시','핫플·사진'].map((item,i)=><GridButton key={i} label={item} emoji={['🌿','🛹','🎨','🔥'][i]} selected={selections.mood===item} onClick={()=>handleSelect('mood',item)}/>)}</div></StepLayout>}
+      {currentScreen === 'MOOD' && <StepLayout useTossNav={useTossNav} title="어떤 무드를 원하시나요?" subtitle="테마를 골라주세요" progress={getProgress()} onBack={goBack} onNext={goNext} disabled={!selections.mood}><div className="selection-grid-list-style">{['힐링·산책','활동·이색','문화·전시','핫플·사진'].map((item,i)=><GridButton key={i} label={item} emoji={['🌿','🛹','🎨','🔥'][i]} selected={selections.mood===item} onClick={()=>handleSelect('mood',item)}/>)}</div></StepLayout>}
       
-      {currentScreen === 'BUDGET' && <StepLayout title="예산은 어느정도인가요?" subtitle="1인 기준입니다" progress={getProgress()} btnText="완료" onBack={goBack} onNext={goNext} disabled={!selections.budget}><div className="list-select-container">{['1만원 이하','1~3만원','3~5만원','5~10만원','Flex'].map((item,i)=><ListButton key={i} label={item} selected={selections.budget===item} onClick={()=>handleSelect('budget',item)}/>)}</div></StepLayout>}
+      {currentScreen === 'BUDGET' && <StepLayout useTossNav={useTossNav} title="예산은 어느정도인가요?" subtitle="1인 기준입니다" progress={getProgress()} btnText="완료" onBack={goBack} onNext={goNext} disabled={!selections.budget}><div className="list-select-container">{['1만원 이하','1~3만원','3~5만원','5~10만원','Flex'].map((item,i)=><ListButton key={i} label={item} selected={selections.budget===item} onClick={()=>handleSelect('budget',item)}/>)}</div></StepLayout>}
 
       {/* COMMON FLOW - REGION */}
       {/* 🌟 지역 이름을 gemini.js 키값과 똑같이 맞춤 */}
-      {currentScreen === 'REGION' && <StepLayout title="어느 지역으로 갈까요?" progress={getProgress()} onBack={goBack} onNext={goNext} disabled={!selections.region}><div className="list-select-container">{['강남·서초','용산·이태원','종로·을지로','성수·건대','홍대·연남'].map((item,i)=><ListButton key={i} label={item} selected={selections.region===item} onClick={()=>handleSelect('region',item)}/>)}</div></StepLayout>}
+      {currentScreen === 'REGION' && <StepLayout useTossNav={useTossNav} title="어느 지역으로 갈까요?" progress={getProgress()} onBack={goBack} onNext={goNext} disabled={!selections.region}><div className="list-select-container region-list">{REGION_OPTIONS.map((item,i)=><ListButton key={i} label={item} selected={selections.region===item} onClick={()=>handleSelect('region',item)}/>)}</div></StepLayout>}
 
       {currentScreen === 'SUMMARY' && (
         <div className="flow-container">
-           <Header onBack={goBack} onClose={() => closeView(() => navigate("/"))} />
+           {!useTossNav && <Header onBack={goBack} onClose={() => closeView(() => navigate("/"))} />}
            <div className="summary-content">
               <h1 className="flow-title">이제 고민 끝!<br/>확인해 볼까요?</h1>
               <div className="summary-card">
@@ -292,7 +309,7 @@ export default function Home() {
 
       {currentScreen === 'LOADING' && (
         <div className="flow-container loading-container">
-           <Header onBack={()=>{}} hideBack hideRight />
+           {!useTossNav && <Header onBack={()=>{}} hideBack hideRight />}
            <div className="loading-content">
               <h1 className="flow-title">{mode === 'eat' ? "오늘을 더 맛있게." : "완벽한 하루를 위해."}</h1>
               <p className="flow-subtitle">잠시만 기다려주세요.</p>
@@ -320,12 +337,12 @@ const Header = ({ onBack, hideBack, hideRight, onClose }) => (
     ) : <div className="header-spacer header-spacer-right" aria-hidden="true" />}
   </div>
 );
-const StepLayout = ({ title, subtitle, progress, children, onBack, onNext, disabled, btnText = "다음", onClose }) => {
+const StepLayout = ({ useTossNav, title, subtitle, progress, children, onBack, onNext, disabled, btnText = "다음", onClose }) => {
   const navigate = useNavigate();
   const handleClose = onClose ?? (() => closeView(() => navigate("/")));
   return (
   <div className="flow-container">
-    <Header onBack={onBack} onClose={handleClose} />
+    {!useTossNav && <Header onBack={onBack} onClose={handleClose} />}
     {progress && <div className="progress-bar-bg"><div className="progress-bar-fill" style={{width: progress}}></div></div>}
     <div className="flow-content">
       <h2 className="flow-question">{title}</h2>
