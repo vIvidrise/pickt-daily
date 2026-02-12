@@ -1,5 +1,19 @@
 {
-  "buildCommand": "npm run build",
-  "outputDirectory": "dist",
-  "installCommand": "npm install"
+  "installCommand": "cd vivid-rise && npm install --legacy-peer-deps",
+  "buildCommand": "cd vivid-rise && npm run build",
+  "outputDirectory": "vivid-rise/dist",
+  "rewrites": [
+    { "source": "/((?!api/).*)", "destination": "/index.html" }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "Content-Security-Policy",
+          "value": "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https:; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: blob:; connect-src 'self' https:; font-src 'self'; worker-src 'self' blob:;"
+        }
+      ]
+    }
+  ]
 }
