@@ -1,7 +1,7 @@
 {
   "installCommand": "cd vivid-rise && npm install --legacy-peer-deps",
   "buildCommand": "cd vivid-rise && npm run build",
-  "outputDirectory": "vivid-rise/dist",
+  "outputDirectory": "vivid-rise/dist/web",
   "rewrites": [
     { "source": "/((?!api/).*)", "destination": "/index.html" }
   ],
