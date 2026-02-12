@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { fetchRecommendations } from "../api/gemini.js";
-import { fetchPlaceFromNaver, toNaverMapPlaceEntryUrl, toNaverPlaceDetailUrl } from "../api/naverPlaceApi.js";
+import { fetchPlaceFromNaver, toNaverMapPlaceEntryUrl, toNaverPlaceDetailUrl, getNaverMapSearchUrl } from "../api/naverPlaceApi.js";
 import { isFavorited, addFavorite, removeFavorite, getFavorites } from "../utils/favorites.js";
 import { isAppsInTossEnv, addAccessoryButton } from "../utils/appsInTossNav.js";
 import { closeView } from "../utils/appsInTossSdk.js";
@@ -78,14 +78,15 @@ export default function Result() {
     if (selectedPlace) setFavorited(isFavorited(selectedPlace, getFavorites()));
   }, [selectedPlace]);
 
-  // 선택한 가게의 네이버 URL → 데이터에 naver_map_url 있으면 우선 사용, 없으면 API로 조회
+  // 선택한 가게의 네이버 URL → 데이터에 naver_map_url/naverUrl 있으면 우선, 없으면 API 조회 후 검색 URL 폴백
   useEffect(() => {
     if (!selectedPlace?.name) {
       setSelectedPlaceNaverLink('');
       return;
     }
-    if (selectedPlace.naver_map_url && selectedPlace.naver_map_url.trim()) {
-      setSelectedPlaceNaverLink(selectedPlace.naver_map_url.trim());
+    const existing = (selectedPlace.naver_map_url || selectedPlace.naverUrl || '').trim();
+    if (existing && existing.length > 10) {
+      setSelectedPlaceNaverLink(existing);
       return;
     }
     const region = state?.region || '';
@@ -93,10 +94,11 @@ export default function Result() {
       .then((data) => {
         const placeDetail = data?.link ? toNaverPlaceDetailUrl(data.link) : '';
         const mapEntry = data?.link ? toNaverMapPlaceEntryUrl(data.link) : '';
-        setSelectedPlaceNaverLink(placeDetail || mapEntry || '');
+        const url = placeDetail || mapEntry || getNaverMapSearchUrl(selectedPlace.name, region);
+        setSelectedPlaceNaverLink(url || '');
       })
-      .catch(() => setSelectedPlaceNaverLink(''));
-  }, [selectedPlace?.name, selectedPlace?.naver_map_url, state?.region]);
+      .catch(() => setSelectedPlaceNaverLink(getNaverMapSearchUrl(selectedPlace.name, region) || ''));
+  }, [selectedPlace?.name, selectedPlace?.naver_map_url, selectedPlace?.naverUrl, state?.region]);
 
   const toggleFavorite = () => {
     if (!selectedPlace) return;
@@ -142,9 +144,20 @@ export default function Result() {
             try {
               const res = await fetchPlaceFromNaver(p.name, region);
               const realAddress = res.roadAddress || res.address || p.address;
-              return { ...p, address: realAddress };
+              const mapUrl = (res.link && (toNaverMapPlaceEntryUrl(res.link) || toNaverPlaceDetailUrl(res.link))) || getNaverMapSearchUrl(p.name, region);
+              return {
+                ...p,
+                address: realAddress,
+                naver_map_url: p.naver_map_url || mapUrl,
+                naverUrl: p.naverUrl || mapUrl,
+              };
             } catch {
-              return p;
+              const searchUrl = getNaverMapSearchUrl(p.name, region);
+              return {
+                ...p,
+                naver_map_url: p.naver_map_url || searchUrl,
+                naverUrl: p.naverUrl || searchUrl,
+              };
             }
           })
         );
@@ -248,7 +261,7 @@ export default function Result() {
               console.warn("네이버 지도 인증 실패 감지 → Leaflet으로 전환. NCP 콘솔에서 웹 서비스 URL 등록을 확인하세요.");
               setMapError(true);
             }
-          }, 2000);
+          }, 3500);
         } catch (err) {
           console.error("네이버 지도 초기화 실패:", err);
           if (!cancelled) setMapError(true);
@@ -449,8 +462,14 @@ export default function Result() {
               <button
                 className="btn-naver"
                 onClick={() => {
-                  if (selectedPlaceNaverLink) {
-                    openNaverMapPlaceUrl(selectedPlaceNaverLink);
+                  let effectiveUrl = selectedPlaceNaverLink || selectedPlace.naver_map_url || selectedPlace.naverUrl;
+                  effectiveUrl = (effectiveUrl && String(effectiveUrl).trim()) || '';
+                  // "map.naver.com/..." 처럼 프로토콜 없는 시트 값 보정
+                  if (effectiveUrl && !/^https?:\/\//i.test(effectiveUrl) && /naver\.com/i.test(effectiveUrl)) {
+                    effectiveUrl = `https://${effectiveUrl.replace(/^\/+/, '')}`;
+                  }
+                  if (effectiveUrl) {
+                    openNaverMapPlaceUrl(effectiveUrl);
                   } else {
                     openNaverMapSearch(selectedPlace.name, state?.region);
                   }

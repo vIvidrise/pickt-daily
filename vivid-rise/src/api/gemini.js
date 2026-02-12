@@ -228,6 +228,16 @@ function parseCsvRow(line) {
   return out;
 }
 
+function normalizeNaverUrl(raw) {
+  if (!raw || typeof raw !== 'string') return '';
+  const s = raw.trim();
+  if (!s) return '';
+  if (/^https?:\/\//i.test(s)) return s;
+  // 시트에 "map.naver.com/..." 처럼 프로토콜 없이 붙여넣은 경우 보정
+  if (/^(map\.|m\.map\.|m\.place\.|place\.)naver\.com\//i.test(s)) return `https://${s}`;
+  return s;
+}
+
 // 시트 CSV 텍스트를 파싱해 db와 CACHED_PLACE_DETAILS에 병합
 // 컬럼: 카테고리(A), 식당명(B), 지역/위치(C), 네이버 도로명 주소(D), 특징/대표메뉴(E), 네이버 지도 링크(F, 선택)
 function mergeSheetIntoDb(text, db, placeDetails) {
@@ -239,7 +249,7 @@ function mergeSheetIntoDb(text, db, placeDetails) {
     const locationHint = (cols[2] || '').trim();
     const address = (cols[3] || '').trim();
     const representativeMenu = (cols[4] || '').trim();
-    const naverMapUrl = (cols[5] || '').trim();
+    const naverMapUrl = normalizeNaverUrl(cols[5] || '');
 
     if (!category || !name) return;
 

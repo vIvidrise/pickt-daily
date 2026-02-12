@@ -54,7 +54,8 @@ function isPlaceEntryUrl(url) {
 export function openNaverMapPlaceUrl(placeUrl) {
   if (!placeUrl || typeof placeUrl !== 'string') return;
   const url = placeUrl.trim();
-  if (!/^https?:\/\/(map\.|m\.place\.|place\.)?naver\.com\//.test(url)) return;
+  // 허용 도메인: map.naver.com, m.map.naver.com, m.place.naver.com, place.naver.com
+  if (!/^https?:\/\/(map\.|m\.map\.|m\.place\.|place\.)naver\.com\//.test(url)) return;
   openUrl(url);
 }
 
