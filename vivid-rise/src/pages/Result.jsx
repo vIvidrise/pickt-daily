@@ -70,6 +70,7 @@ export default function Result() {
   const [mapReady, setMapReady] = useState(false);
   const [favorited, setFavorited] = useState(false);
   const [selectedPlaceNaverLink, setSelectedPlaceNaverLink] = useState('');
+  const [recommendMeta, setRecommendMeta] = useState(null);
   const useTossNav = isAppsInTossEnv();
 
   const isDoMode = state?.mode === 'do';
@@ -78,10 +79,16 @@ export default function Result() {
     if (selectedPlace) setFavorited(isFavorited(selectedPlace, getFavorites()));
   }, [selectedPlace]);
 
-  // 선택한 가게의 네이버 URL → 데이터에 naver_map_url/naverUrl 있으면 우선, 없으면 API 조회 후 검색 URL 폴백
+  // 선택한 가게의 네이버 URL
+  // - eat: places.ts의 naver_map_url(엑셀 F열) 그대로 사용 (검색 쿼리 새로 만들지 않음)
+  // - do: API 조회 후 폴백
   useEffect(() => {
     if (!selectedPlace?.name) {
       setSelectedPlaceNaverLink('');
+      return;
+    }
+    if (!isDoMode) {
+      setSelectedPlaceNaverLink((selectedPlace.naver_map_url || '').trim());
       return;
     }
     const existing = (selectedPlace.naver_map_url || selectedPlace.naverUrl || '').trim();
@@ -98,7 +105,7 @@ export default function Result() {
         setSelectedPlaceNaverLink(url || '');
       })
       .catch(() => setSelectedPlaceNaverLink(getNaverMapSearchUrl(selectedPlace.name, region) || ''));
-  }, [selectedPlace?.name, selectedPlace?.naver_map_url, selectedPlace?.naverUrl, state?.region]);
+  }, [isDoMode, selectedPlace?.name, selectedPlace?.naver_map_url, selectedPlace?.naverUrl, state?.region]);
 
   const toggleFavorite = () => {
     if (!selectedPlace) return;
@@ -132,13 +139,26 @@ export default function Result() {
   useEffect(() => {
     const searchParams = state || { mode: 'eat', region: '강남·서초' };
     const region = searchParams.region || '';
+    setLoading(true);
+    setMapError(false);
+    setMapReady(false);
     fetchRecommendations(searchParams)
-      .then(async (data) => {
+      .then(async (payload) => {
+        const data = payload?.items ?? payload;
+        setRecommendMeta(payload?.meta ?? null);
         if (!data?.length) {
           setList([]);
           setLoading(false);
           return;
         }
+        // eat 모드: places.ts의 naver_map_url을 그대로 사용해야 하므로 링크를 덮어쓰지 않음
+        if (searchParams.mode !== 'do') {
+          setList(data);
+          setLoading(false);
+          return;
+        }
+
+        // do 모드: 선택한 장소를 네이버에서 잘 열기 위해 주소/링크 보강
         const enriched = await Promise.all(
           data.map(async (p) => {
             try {
@@ -174,13 +194,6 @@ export default function Result() {
   useEffect(() => {
     if (loading || list.length === 0 || !mapElement.current) return;
 
-    const centerLat = list[0].lat;
-    const centerLng = list[0].lng ?? list[0].left;
-    if (centerLat == null || centerLng == null) {
-      setMapError(true);
-      return;
-    }
-
     let cancelled = false;
     let authErrorTimer = null;
     // 공식 문서: Open API 인증 실패 시 전역 함수가 호출됨
@@ -192,9 +205,76 @@ export default function Result() {
     };
 
     loadNaverMapScript()
-      .then((naver) => {
+      .then(async (naver) => {
         if (cancelled || !mapElement.current) return;
         try {
+          // 좌표가 0/없으면 주소로 지오코딩 (geocoder 서브모듈 필요)
+          const regionRaw = (state?.region || '').toString().trim();
+          const regionHint = regionRaw ? regionRaw.split(/[·\s/]+/)[0] : '';
+
+          const geocode = (query) =>
+            new Promise((resolve) => {
+              if (!query || !naver?.maps?.Service?.geocode) return resolve(null);
+              naver.maps.Service.geocode({ query }, (status, response) => {
+                try {
+                  const ok = status === naver.maps.Service.Status.OK;
+                  if (!ok) return resolve(null);
+                  const addr = response?.v2?.addresses?.[0];
+                  const x = Number(addr?.x);
+                  const y = Number(addr?.y);
+                  if (!Number.isFinite(x) || !Number.isFinite(y)) return resolve(null);
+                  resolve({ lat: y, lng: x });
+                } catch (_) {
+                  resolve(null);
+                }
+              });
+            });
+
+          const needsGeocode = (p) => {
+            const lat = Number(p?.lat);
+            const lng = Number(p?.lng ?? p?.left);
+            return !Number.isFinite(lat) || !Number.isFinite(lng) || lat === 0 || lng === 0;
+          };
+
+          const resolvedList = await Promise.all(
+            list.map(async (p) => {
+              if (!needsGeocode(p)) return p;
+              const addr = (p?.address || '').toString().trim();
+              const query =
+                (addr && !addr.includes("정확한 위치는") ? addr : '') ||
+                `${p?.name || ''} ${regionHint}`.trim();
+              const r = await geocode(query);
+              if (!r) return p;
+              return { ...p, lat: r.lat, lng: r.lng };
+            })
+          );
+
+          // 좌표가 실제로 보정된 경우: 리스트를 먼저 갱신하고, 다음 렌더 사이클에서 지도 초기화
+          const changed = resolvedList.some((p, idx) => {
+            const o = list[idx];
+            if (!o) return true;
+            const latChanged = Number(p?.lat) !== Number(o?.lat);
+            const lngChanged = Number(p?.lng ?? p?.left) !== Number(o?.lng ?? o?.left);
+            return latChanged || lngChanged;
+          });
+          if (!cancelled && changed) {
+            setList(resolvedList);
+            return;
+          }
+
+          const first = resolvedList.find((p) => {
+            const lat = Number(p?.lat);
+            const lng = Number(p?.lng ?? p?.left);
+            return Number.isFinite(lat) && Number.isFinite(lng) && lat !== 0 && lng !== 0;
+          });
+          if (!first) {
+            if (!cancelled) setMapError(true);
+            return;
+          }
+
+          const centerLat = Number(first.lat);
+          const centerLng = Number(first.lng ?? first.left);
+
           const map = new naver.maps.Map(mapElement.current, {
             center: new naver.maps.LatLng(centerLat, centerLng),
             zoom: 15,
@@ -203,7 +283,7 @@ export default function Result() {
           naverMapRef.current = map;
 
           const markers = [];
-          list.forEach((item) => {
+          resolvedList.forEach((item) => {
             const lng = item.lng ?? item.left;
             if (item.lat == null || lng == null) return;
 
@@ -240,8 +320,8 @@ export default function Result() {
           // 추천 장소 전체가 보이도록 지도 영역 맞춤 (앱인토스 지도 연동)
           if (markers.length > 0) {
             const bounds = new naver.maps.LatLngBounds(
-              new naver.maps.LatLng(Math.min(...list.map((i) => i.lat).filter(Number.isFinite)) - 0.005, Math.min(...list.map((i) => i.lng ?? i.left).filter(Number.isFinite)) - 0.005),
-              new naver.maps.LatLng(Math.max(...list.map((i) => i.lat).filter(Number.isFinite)) + 0.005, Math.max(...list.map((i) => i.lng ?? i.left).filter(Number.isFinite)) + 0.005)
+              new naver.maps.LatLng(Math.min(...resolvedList.map((i) => i.lat).filter(Number.isFinite)) - 0.005, Math.min(...resolvedList.map((i) => i.lng ?? i.left).filter(Number.isFinite)) - 0.005),
+              new naver.maps.LatLng(Math.max(...resolvedList.map((i) => i.lat).filter(Number.isFinite)) + 0.005, Math.max(...resolvedList.map((i) => i.lng ?? i.left).filter(Number.isFinite)) + 0.005)
             );
             naverMapBoundsRef.current = bounds;
             try {
@@ -283,6 +363,12 @@ export default function Result() {
       cancelled = true;
       if (authErrorTimer) clearTimeout(authErrorTimer);
       window.navermap_authFailure = prevAuthFailure;
+      naverMapRef.current = null;
+      naverMapBoundsRef.current = null;
+      // 재추천/재렌더 시 중복 초기화 방지용으로 컨테이너를 비움
+      if (mapElement.current) {
+        try { mapElement.current.innerHTML = ""; } catch (_) {}
+      }
     };
   }, [loading, list, isDoMode]);
 
@@ -385,6 +471,47 @@ export default function Result() {
               <div className="map-legend-row"><span className="map-legend-dot pin-legend-5" /> 5단계</div>
             </div>
           )}
+
+          {/* 조건 완화 안내 + 범용 검색 (예외 처리) */}
+          {!isDoMode && recommendMeta?.relaxed && recommendMeta?.reason && (
+            <div
+              className="recommend-fallback-banner"
+              style={{
+                position: 'absolute',
+                top: 88,
+                left: 16,
+                right: 16,
+                zIndex: 2,
+                padding: '10px 12px',
+                borderRadius: 12,
+                background: 'rgba(0,0,0,0.72)',
+                color: '#fff',
+                display: 'flex',
+                gap: 10,
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                backdropFilter: 'blur(6px)',
+              }}
+            >
+              <div style={{ fontSize: 13, lineHeight: 1.3 }}>{recommendMeta.reason}</div>
+              <button
+                type="button"
+                style={{
+                  flexShrink: 0,
+                  border: 0,
+                  borderRadius: 999,
+                  padding: '8px 10px',
+                  background: '#03C75A',
+                  color: '#fff',
+                  fontWeight: 700,
+                  fontSize: 12,
+                }}
+                onClick={() => openNaverMapSearch(state?.menu || '맛집', state?.region)}
+              >
+                네이버에서 더 찾기
+              </button>
+            </div>
+          )}
         </>
       )}
 
@@ -470,6 +597,13 @@ export default function Result() {
               <button
                 className="btn-naver"
                 onClick={() => {
+                  // 오늘 뭐 먹지: 엑셀(places.ts) naver_map_url 그대로 사용 (검색 쿼리 재생성 금지)
+                  if (!isDoMode) {
+                    const url = (selectedPlace?.naver_map_url || '').trim();
+                    if (url) openNaverMapPlaceUrl(url);
+                    else openNaverMapSearch(selectedPlace.name, state?.region); // 예외: 데이터에 URL이 없을 때만
+                    return;
+                  }
                   let effectiveUrl = selectedPlaceNaverLink || selectedPlace.naver_map_url || selectedPlace.naverUrl;
                   effectiveUrl = (effectiveUrl && String(effectiveUrl).trim()) || '';
                   // "map.naver.com/..." 처럼 프로토콜 없는 시트 값 보정

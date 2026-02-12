@@ -57,7 +57,7 @@ function TossEventSubscriber({ useTossNav, children }) {
 }
 
 /**
- * HashRouter 사용 → 주소가 http://localhost:5173/#/result 처럼 # 뒤에만 바뀜.
+ * HashRouter 사용 → 주소가 http://localhost:5174/#/result 처럼 # 뒤에만 바뀜.
  * 앱인토스 WebView: 네이티브 내비, Safe Area, 뒤로가기/진입 완료 이벤트 연동.
  */
 function App() {

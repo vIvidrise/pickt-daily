@@ -30,7 +30,7 @@ export default {
   },
   web: {
     host: 'localhost',
-    port: 5173,
+    port: 5174,
     commands: {
       dev: 'npm run dev',
       build: 'npm run build',

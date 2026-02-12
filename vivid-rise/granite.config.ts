@@ -19,7 +19,7 @@ export default defineConfig({
   },
   web: {
     host: 'localhost',
-    port: 5173,
+    port: 5174,
     commands: {
       dev: 'vite',
       build: 'vite build',

@@ -2,25 +2,30 @@
  * 네이버 지도 JavaScript API v3 (웹용) 스크립트 로더
  * - 문서: https://navermaps.github.io/maps.js.ncp/docs/
  * - NCP 콘솔에서 웹 서비스 URL에 실서비스 도메인 등록 필수
- *   예: https://vivid-rise.vercel.app, http://localhost:5173
+ *   실제 서비스: https://vivid-rise.vercel.app
+ *   로컬: http://localhost:5174
  */
 
 // 네이버 지도 Client ID — Vite/Vercel 환경 변수 VITE_NAVER_MAP_CLIENT_ID (빌드 시점에 주입됨)
-const CLIENT_ID =
+const envId =
   (typeof import.meta !== "undefined" && import.meta.env?.VITE_NAVER_MAP_CLIENT_ID)
     ? String(import.meta.env.VITE_NAVER_MAP_CLIENT_ID).trim()
     : "";
+// 로컬 개발 시 .env 미로드 등으로 비어 있으면 fallback (배포 시에는 반드시 Vercel 환경 변수 설정)
+const CLIENT_ID =
+  envId ||
+  (typeof import.meta !== "undefined" && import.meta.env?.DEV ? "tfdaiuu9rx" : "");
 // NCP Maps: ncpKeyId(신규) / ncpClientId(구버전) 둘 다 시도. 블로그 참고: https://m.blog.naver.com/dossong_/223936065167
 const SCRIPT_URLS = CLIENT_ID
   ? [
-      `https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=${encodeURIComponent(CLIENT_ID)}`,
-      `https://openapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=${encodeURIComponent(CLIENT_ID)}`,
-      `https://openapi.map.naver.com/openapi/v3/maps.js?ncpClientId=${encodeURIComponent(CLIENT_ID)}`,
+      `https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=${encodeURIComponent(CLIENT_ID)}&submodules=geocoder`,
+      `https://openapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=${encodeURIComponent(CLIENT_ID)}&submodules=geocoder`,
+      `https://openapi.map.naver.com/openapi/v3/maps.js?ncpClientId=${encodeURIComponent(CLIENT_ID)}&submodules=geocoder`,
     ]
   : [];
 
 const MAP_SETUP_MSG =
-  "[네이버 지도] 1) Vercel/로컬 .env에 VITE_NAVER_MAP_CLIENT_ID 설정 2) NCP 콘솔 > Maps > Application > 웹 서비스 URL에 https://vivid-rise.vercel.app, http://localhost:5173 등록";
+  "[네이버 지도] 1) Vercel/로컬 .env에 VITE_NAVER_MAP_CLIENT_ID 설정 2) NCP 콘솔 > Maps > Application > 웹 서비스 URL에 실제 서비스 https://vivid-rise.vercel.app 및 로컬 http://localhost:5174 등록";
 
 let loading = false;
 let loaded = false;
@@ -59,10 +64,18 @@ function tryLoadOne() {
   script.src = scriptUrl;
   script.async = true;
   script.onload = () => {
-    loading = false;
-    loaded = !!window.naver?.maps;
-    if (loaded && resolvePromise) resolvePromise(window.naver);
-    else if (!loaded && rejectPromise) rejectPromise(new Error("naver.maps not defined"));
+    if (window.naver?.maps) {
+      loading = false;
+      loaded = true;
+      if (resolvePromise) resolvePromise(window.naver);
+      return;
+    }
+    setTimeout(() => {
+      loading = false;
+      loaded = !!window.naver?.maps;
+      if (loaded && resolvePromise) resolvePromise(window.naver);
+      else if (!loaded && rejectPromise) rejectPromise(new Error("naver.maps not defined"));
+    }, 200);
   };
   script.onerror = () => {
     tryIndex += 1;

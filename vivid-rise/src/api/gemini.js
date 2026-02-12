@@ -2,6 +2,7 @@
 
 import { places as placesList } from '../data/places';
 import restaurantLinksFromXlsx from '../data/restaurantLinksFromXlsx.json';
+import { recommendEatPlaces } from '../utils/recommendEat.js';
 
 // 1. 구글 시트 (맛집 데이터) — 여러 탭 gid 로드 후 병합, 모든 주소로 '네이버에서 보기' 연결
 const GOOGLE_SHEET_BASE = 'https://docs.google.com/spreadsheets/d/1C4y3wbFKCYkqHy4ZDhH7AddsTRc3X431mMl6816r9Lw/export?format=csv&gid=';
@@ -504,38 +505,52 @@ export async function fetchRecommendations(params) {
 
   console.log(`🔎 검색: [${regionKey}] 지역의 [${category}] (${mode})`);
 
-  // 오늘 뭐 먹지: places.ts(673개)에서 지역·메뉴 필터 후 랜덤 3개 사용
+  // 오늘 뭐 먹지: places.ts(엑셀) 기반으로 [카테고리+지역] 필터 후, [분위기/시설] 가산점으로 상위 3개 추천
   if (mode === 'eat' && placesList && placesList.length > 0) {
-    const db = await getDatabase();
-    const regionData = db[regionKey] || db['강남·서초'];
-    const baseCoords = regionData?.coords || { lat: 37.5665, lng: 126.978 };
-    const picked = getRandomPlacesFromData(regionKey, category);
+    const facilityRaw = params?.facility;
+    const facilities =
+      Array.isArray(facilityRaw)
+        ? facilityRaw
+        : typeof facilityRaw === 'string'
+          ? facilityRaw.split(',').map((s) => s.trim()).filter(Boolean)
+          : [];
+    const mood = params?.occasion || '';
+
+    const rec = recommendEatPlaces({
+      places: placesList,
+      category: params?.menu || category,
+      region: regionKey,
+      mood,
+      facilities,
+    });
+
+    const picked = rec.items || [];
     const results = picked.map((p, index) => {
-      const offset = () => (Math.random() - 0.5) * 0.008;
       const xlsx = getXlsxLink(p.name);
-      const xlsxUrl = xlsx?.naver_map_url || '';
-      const xlsxAddress = xlsx?.address || '';
+      // "네이버에서 보기"는 places.ts의 naver_map_url(엑셀 F열)을 최우선으로 사용
+      const naver_map_url = (p.naver_map_url || '').trim();
+      const naverUrl = naver_map_url;
       return {
         id: p.id,
         name: p.name,
-        description: p.description || `${p.category} 핫플레이스`,
-        lat: baseCoords.lat + offset(),
-        lng: baseCoords.lng + offset(),
+        description: p.description || `${p.category} 맛집`,
+        lat: p.lat,
+        lng: p.lng,
         emoji: getCategoryEmoji(p.category),
         status: Math.random() > 0.4 ? "웨이팅 있음" : "입장 가능",
         statusColor: "green",
         notice: NOTICES[Math.floor(Math.random() * NOTICES.length)],
-        naverUrl: xlsxUrl || p.naver_map_url || '',
-        naver_map_url: xlsxUrl || p.naver_map_url || '',
+        naverUrl,
+        naver_map_url,
         hours: "11:00 - 22:00",
-        address: p.address || xlsxAddress || '',
+        address: p.address || xlsx?.address || '',
         time: ["12:00", "15:00", "18:00"][index],
         tag: p.category,
         representativeMenu: p.description || '',
-        solo_difficulty_level: Math.min(5, Math.max(1, index + 1 + Math.floor(Math.random() * 2)))
+        solo_difficulty_level: Math.min(5, Math.max(1, index + 1 + Math.floor(Math.random() * 2))),
       };
     });
-    return new Promise((resolve) => setTimeout(() => resolve(results), 400));
+    return new Promise((resolve) => setTimeout(() => resolve({ items: results, meta: rec.meta }), 150));
   }
 
   // 오늘 뭐 하지: 기존 DB 로직 유지
@@ -595,7 +610,7 @@ export async function fetchRecommendations(params) {
     };
   });
 
-  return new Promise(resolve => setTimeout(() => resolve(results), 600));
+  return new Promise(resolve => setTimeout(() => resolve({ items: results, meta: { relaxed: false } }), 600));
 }
 
 // (lat,lng)에서 가장 가까운 지역 키 반환

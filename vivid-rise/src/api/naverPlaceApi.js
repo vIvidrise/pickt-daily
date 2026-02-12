@@ -6,12 +6,16 @@
  */
 
 /**
- * 네이버 지도 검색 URL 생성. 검색어는 '장소명 + 지역'만 사용 (전체 주소 사용 시 검색결과 없음 발생).
+ * 네이버 지도 검색 URL 생성. 검색어는 '장소명 + 지역(첫 토큰)'만 사용 (전체 주소·복합지역 전부 넣으면 검색 실패 많음).
  */
 export function getNaverMapSearchUrl(name, region = '') {
   if (!name || typeof name !== 'string') return '';
   const parts = [name.trim()];
-  if (region && String(region).trim()) parts.push(String(region).trim());
+  const raw = region && String(region).trim();
+  if (raw) {
+    const regionHint = raw.split(/[·\s]+/)[0] || raw;
+    parts.push(regionHint);
+  }
   const query = parts.join(' ');
   return `https://map.naver.com/p/search/${encodeURIComponent(query)}`;
 }
