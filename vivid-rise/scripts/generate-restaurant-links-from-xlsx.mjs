@@ -30,6 +30,7 @@ function normalizeNaverUrl(raw) {
   if (!s) return '';
   if (/^https?:\/\//i.test(s)) return s;
   if (/^(map\.|m\.map\.|m\.place\.|place\.)naver\.com\//i.test(s)) return `https://${s}`;
+  if (/^naver\.me\//i.test(s)) return `https://${s}`;
   return s;
 }
 
@@ -69,7 +70,7 @@ for (let i = start; i < rows.length; i += 1) {
   const naver_map_url = normalizeNaverUrl(row[5] ?? '');
 
   if (!name) continue;
-  if (!naver_map_url || naver_map_url.length < 10 || !/naver\.com/i.test(naver_map_url)) continue;
+  if (!naver_map_url || naver_map_url.length < 10 || !/naver\.(com|me)/i.test(naver_map_url)) continue;
 
   // Keep first non-empty; don't overwrite unless existing is empty
   if (!byName[name] || !byName[name].naver_map_url) {

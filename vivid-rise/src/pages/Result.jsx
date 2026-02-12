@@ -465,7 +465,7 @@ export default function Result() {
                   let effectiveUrl = selectedPlaceNaverLink || selectedPlace.naver_map_url || selectedPlace.naverUrl;
                   effectiveUrl = (effectiveUrl && String(effectiveUrl).trim()) || '';
                   // "map.naver.com/..." 처럼 프로토콜 없는 시트 값 보정
-                  if (effectiveUrl && !/^https?:\/\//i.test(effectiveUrl) && /naver\.com/i.test(effectiveUrl)) {
+                  if (effectiveUrl && !/^https?:\/\//i.test(effectiveUrl) && /naver\.(com|me)/i.test(effectiveUrl)) {
                     effectiveUrl = `https://${effectiveUrl.replace(/^\/+/, '')}`;
                   }
                   if (effectiveUrl) {
