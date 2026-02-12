@@ -1,0 +1,837 @@
+{
+  "byName": {
+    "노랑저고리": {
+      "naver_map_url": "https://map.naver.com/p/search/노랑저고리%20서울%20서초구%20서초대로73길%209",
+      "address": "서울 서초구 서초대로73길 9",
+      "representativeMenu": "가성비 좋은 한정식 (접대 추천)",
+      "locationHint": "강남역",
+      "category": "한식"
+    },
+    "동화고옥": {
+      "naver_map_url": "https://map.naver.com/p/search/동화고옥%20강남N타워",
+      "address": "서울 강남구 테헤란로 129",
+      "representativeMenu": "프라이빗 룸 궁중 갈비 코스",
+      "locationHint": "강남N타워",
+      "category": "한식"
+    },
+    "조양관": {
+      "naver_map_url": "https://map.naver.com/p/search/조양관%20서울%20서초구%20서초대로74길%2029",
+      "address": "서울 서초구 서초대로74길 29",
+      "representativeMenu": "상견례 및 비즈니스 미팅용 한정식",
+      "locationHint": "강남역",
+      "category": "한식"
+    },
+    "담": {
+      "naver_map_url": "https://map.naver.com/p/search/담%20예술의전당",
+      "address": "서울 서초구 남부순환로 2406",
+      "representativeMenu": "곤드레밥 정식 (서예박물관 내)",
+      "locationHint": "예술의전당",
+      "category": "한식"
+    },
+    "피양옥": {
+      "naver_map_url": "https://map.naver.com/p/search/피양옥%20서울%20강남구%20삼성로133길%2014",
+      "address": "서울 강남구 삼성로133길 14",
+      "representativeMenu": "평양냉면 및 어복쟁반 맛집",
+      "locationHint": "청담",
+      "category": "한식"
+    },
+    "청계산곤드레집": {
+      "naver_map_url": "https://map.naver.com/p/search/청계산곤드레집%20본점",
+      "address": "서울 서초구 청계산로 442",
+      "representativeMenu": "등산객 필수 코스 곤드레밥",
+      "locationHint": "청계산",
+      "category": "한식"
+    },
+    "산들해": {
+      "naver_map_url": "https://map.naver.com/p/search/산들해%20양재점",
+      "address": "서울 서초구 강남대로 213",
+      "representativeMenu": "이천쌀밥 한정식 (엘타워)",
+      "locationHint": "양재",
+      "category": "한식"
+    },
+    "우밀가": {
+      "naver_map_url": "https://map.naver.com/p/search/우밀가%20서초점",
+      "address": "서울 서초구 서초대로46길 11",
+      "representativeMenu": "안동국시 및 수육 전문",
+      "locationHint": "서초",
+      "category": "한식"
+    },
+    "새벽집": {
+      "naver_map_url": "https://map.naver.com/p/search/새벽집%20청담동%20본점",
+      "address": "서울 강남구 도산대로101길 6",
+      "representativeMenu": "24시간 육회비빔밥 노포",
+      "locationHint": "청담",
+      "category": "한식"
+    },
+    "영동장어": {
+      "naver_map_url": "https://map.naver.com/p/search/영동장어%20서울%20강남구%20언주로148길%208",
+      "address": "서울 강남구 언주로148길 8",
+      "representativeMenu": "프리미엄 갯벌장어 구이",
+      "locationHint": "논현",
+      "category": "한식"
+    },
+    "호족반": {
+      "naver_map_url": "https://map.naver.com/p/search/호족반%20청담",
+      "address": "서울 강남구 언주로164길 39",
+      "representativeMenu": "퓨전 한식 웨이팅 맛집",
+      "locationHint": "압구정",
+      "category": "한식"
+    },
+    "무월식탁": {
+      "naver_map_url": "https://map.naver.com/p/search/무월식탁%20강남본점",
+      "address": "서울 강남구 강남대로102길 23",
+      "representativeMenu": "깔끔한 1인 한식 반상",
+      "locationHint": "강남역",
+      "category": "한식"
+    },
+    "땀땀": {
+      "naver_map_url": "https://map.naver.com/p/search/땀땀%20강남본점",
+      "address": "서울 강남구 강남대로98길 12-5",
+      "representativeMenu": "매운 소곱창 쌀국수 원조",
+      "locationHint": "강남역",
+      "category": "한식"
+    },
+    "옥소반": {
+      "naver_map_url": "https://map.naver.com/p/search/옥소반%20역삼점",
+      "address": "서울 강남구 테헤란로25길 20",
+      "representativeMenu": "스키야키 및 샤브샤브 전문",
+      "locationHint": "역삼",
+      "category": "한식/일식"
+    },
+    "대가방": {
+      "naver_map_url": "https://map.naver.com/p/search/대가방%20본점",
+      "address": "서울 강남구 선릉로145길 13",
+      "representativeMenu": "서울 3대 탕수육 맛집",
+      "locationHint": "논현",
+      "category": "중식"
+    },
+    "이도곰탕": {
+      "naver_map_url": "https://map.naver.com/p/search/이도곰탕%20본점",
+      "address": "서울 강남구 논현로94길 29-5",
+      "representativeMenu": "맑고 진한 역삼 곰탕 맛집",
+      "locationHint": "역삼",
+      "category": "한식"
+    },
+    "봉피양": {
+      "naver_map_url": "https://map.naver.com/p/search/봉피양%20양재점",
+      "address": "서울 서초구 강남대로 259",
+      "representativeMenu": "평양냉면 및 돼지갈비 명가",
+      "locationHint": "양재",
+      "category": "한식"
+    },
+    "한일관": {
+      "naver_map_url": "https://map.naver.com/p/search/한일관%20압구정본점",
+      "address": "서울 강남구 압구정로38길 14",
+      "representativeMenu": "전통 있는 불고기 노포",
+      "locationHint": "압구정",
+      "category": "한식"
+    },
+    "권숙수": {
+      "naver_map_url": "https://map.naver.com/p/search/권숙수",
+      "address": "서울 강남구 압구정로80길 37",
+      "representativeMenu": "미슐랭 2스타 한식 다이닝",
+      "locationHint": "청담",
+      "category": "한식"
+    },
+    "정식당": {
+      "naver_map_url": "https://map.naver.com/p/search/정식당",
+      "address": "서울 강남구 선릉로158길 11",
+      "representativeMenu": "모던 한식 파인다이닝",
+      "locationHint": "청담",
+      "category": "한식"
+    },
+    "도산분식": {
+      "naver_map_url": "https://map.naver.com/p/search/도산분식%20압구정점",
+      "address": "서울 강남구 도산대로49길 10-6",
+      "representativeMenu": "뉴트로 감성 분식 맛집",
+      "locationHint": "도산공원",
+      "category": "한식/분식"
+    },
+    "뱃고동": {
+      "naver_map_url": "https://map.naver.com/p/search/뱃고동%20압구정본점",
+      "address": "서울 강남구 언주로172길 54",
+      "representativeMenu": "오징어/낙지 불고기 노포",
+      "locationHint": "압구정",
+      "category": "한식"
+    },
+    "현대정육식당": {
+      "naver_map_url": "https://map.naver.com/p/search/현대정육식당%20서울%20강남구%20논현로167길%2019",
+      "address": "서울 강남구 논현로167길 19",
+      "representativeMenu": "24시간 김치찌개와 삼겹살",
+      "locationHint": "압구정",
+      "category": "한식"
+    },
+    "보슬보슬": {
+      "naver_map_url": "https://map.naver.com/p/search/보슬보슬%20역삼본점",
+      "address": "서울 강남구 테헤란로8길 22",
+      "representativeMenu": "원조 키토김밥 맛집",
+      "locationHint": "역삼",
+      "category": "한식"
+    },
+    "청담25": {
+      "naver_map_url": "https://map.naver.com/p/search/청담25",
+      "address": "서울 강남구 압구정로79길 32",
+      "representativeMenu": "고급 미역국 정식과 게장",
+      "locationHint": "청담",
+      "category": "한식"
+    },
+    "삼원가든": {
+      "naver_map_url": "https://map.naver.com/p/search/삼원가든",
+      "address": "서울 강남구 언주로 835",
+      "representativeMenu": "전통 가든형 갈비 레스토랑",
+      "locationHint": "압구정",
+      "category": "한식"
+    },
+    "을지다락": {
+      "naver_map_url": "https://map.naver.com/p/search/을지다락%20강남",
+      "address": "서울 강남구 강남대로96길 22",
+      "representativeMenu": "오므라이스 및 퓨전 양식",
+      "locationHint": "강남",
+      "category": "양식/퓨전"
+    },
+    "중앙해장": {
+      "naver_map_url": "https://map.naver.com/p/search/중앙해장",
+      "address": "서울 강남구 영동대로86길 17",
+      "representativeMenu": "곱창전골 및 해장국 성지",
+      "locationHint": "삼성",
+      "category": "한식"
+    },
+    "시래향": {
+      "naver_map_url": "https://map.naver.com/p/search/시래향%20서초점",
+      "address": "서울 서초구 사평대로 335",
+      "representativeMenu": "시래기 불고기 정식",
+      "locationHint": "서초",
+      "category": "한식"
+    },
+    "서석대": {
+      "naver_map_url": "https://map.naver.com/p/search/서석대",
+      "address": "서울 서초구 서초대로 320",
+      "representativeMenu": "교대역 투뿔 소고기 전문",
+      "locationHint": "서초",
+      "category": "한식"
+    },
+    "버드나무집": {
+      "naver_map_url": "https://map.naver.com/p/search/버드나무집%20서초본점",
+      "address": "서울 서초구 효령로 434",
+      "representativeMenu": "한정수량 갈비탕 명가",
+      "locationHint": "서초",
+      "category": "한식"
+    },
+    "이모네옛날떡볶이": {
+      "naver_map_url": "https://map.naver.com/p/search/이모네옛날떡볶이",
+      "address": "서울 서초구 남부순환로356길 114",
+      "representativeMenu": "은광여고 앞 노포 떡볶이",
+      "locationHint": "양재",
+      "category": "한식/분식"
+    },
+    "3대삼계장인": {
+      "naver_map_url": "https://map.naver.com/p/search/3대삼계장인",
+      "address": "서울 서초구 반포대로28길 56-3",
+      "representativeMenu": "수비드 닭볶음탕과 삼계탕",
+      "locationHint": "서초",
+      "category": "한식"
+    },
+    "백년옥": {
+      "naver_map_url": "https://map.naver.com/p/search/백년옥%20본점",
+      "address": "서울 서초구 남부순환로 2407",
+      "representativeMenu": "미슐랭 빕구르망 두부 요리",
+      "locationHint": "예술의전당",
+      "category": "한식"
+    },
+    "서초면옥": {
+      "naver_map_url": "https://map.naver.com/p/search/서초면옥%20서초본점",
+      "address": "서울 서초구 서초대로 253",
+      "representativeMenu": "갈비찜과 함흥냉면 전문",
+      "locationHint": "서초",
+      "category": "한식"
+    },
+    "소이연남": {
+      "naver_map_url": "https://map.naver.com/p/search/소이연남%20파미에스테이션점",
+      "address": "서울 서초구 사평대로 205",
+      "representativeMenu": "태국식 소고기 국수",
+      "locationHint": "파미에",
+      "category": "아시안"
+    },
+    "한국수": {
+      "naver_map_url": "https://map.naver.com/p/search/한국수%20예술의전당점",
+      "address": "서울 서초구 남부순환로 2407",
+      "representativeMenu": "전국 국수 요리 팔도 맛집",
+      "locationHint": "서초",
+      "category": "한식"
+    },
+    "그림나베": {
+      "naver_map_url": "https://map.naver.com/p/search/그림나베%20교대역점",
+      "address": "서울 서초구 서초대로51길 14",
+      "representativeMenu": "정갈한 밀푀유 나베 전문",
+      "locationHint": "교대",
+      "category": "한식"
+    },
+    "듬북담북": {
+      "naver_map_url": "https://map.naver.com/p/search/듬북담북%20서초동본점",
+      "address": "서울 서초구 서초대로46길 9",
+      "representativeMenu": "진한 황태 북어국",
+      "locationHint": "서초",
+      "category": "한식"
+    },
+    "교대이층집": {
+      "naver_map_url": "https://map.naver.com/p/search/교대이층집%20교대본점",
+      "address": "서울 서초구 서초대로50길 24",
+      "representativeMenu": "꽃삼겹살 레트로 고기집",
+      "locationHint": "교대",
+      "category": "한식"
+    },
+    "원조부안집": {
+      "naver_map_url": "https://map.naver.com/p/search/원조부안집%20강남역점",
+      "address": "서울 강남구 강남대로94길 23",
+      "representativeMenu": "쫀득살 및 파김치 맛집",
+      "locationHint": "강남",
+      "category": "한식"
+    },
+    "봉산옥": {
+      "naver_map_url": "https://map.naver.com/p/search/봉산옥%20서초동본점",
+      "address": "서울 서초구 반포대로8길 5-6",
+      "representativeMenu": "미슐랭 빕구르망 만두국 명가",
+      "locationHint": "서초",
+      "category": "한식"
+    },
+    "스시소라": {
+      "naver_map_url": "https://map.naver.com/p/search/스시소라%20서초점",
+      "address": "서울 서초구 서초대로 254",
+      "representativeMenu": "가성비 오마카세 코스",
+      "locationHint": "서초",
+      "category": "일식"
+    },
+    "미나미": {
+      "naver_map_url": "https://map.naver.com/p/search/미나미%20교대",
+      "address": "서울 서초구 서초대로58길 31-2",
+      "representativeMenu": "미슐랭 빕구르망 소바 전문",
+      "locationHint": "서초",
+      "category": "일식"
+    },
+    "쇼쿠지": {
+      "naver_map_url": "https://map.naver.com/p/search/쇼쿠지%20양재점",
+      "address": "서울 서초구 강남대로39길 6",
+      "representativeMenu": "푸짐한 텐동과 일본 가정식",
+      "locationHint": "양재",
+      "category": "일식"
+    },
+    "정돈": {
+      "naver_map_url": "https://map.naver.com/p/search/정돈%20강남점",
+      "address": "서울 강남구 강남대로110길 19",
+      "representativeMenu": "프리미엄 돈카츠 전문",
+      "locationHint": "강남",
+      "category": "일식"
+    },
+    "멘야산다이메": {
+      "naver_map_url": "https://map.naver.com/p/search/멘야산다이메%20강남점",
+      "address": "서울 강남구 강남대로114길 23",
+      "representativeMenu": "일본 정통 라멘 전문점",
+      "locationHint": "논현",
+      "category": "일식"
+    },
+    "동경규동": {
+      "naver_map_url": "https://map.naver.com/p/search/동경규동%20강남점",
+      "address": "서울 강남구 강남대로 455",
+      "representativeMenu": "규동 및 가츠동 혼밥 맛집",
+      "locationHint": "강남",
+      "category": "일식"
+    },
+    "카츠공방": {
+      "naver_map_url": "https://map.naver.com/p/search/카츠공방%20서초점",
+      "address": "서울 서초구 서초대로46길 99",
+      "representativeMenu": "수제 돈카츠와 나베",
+      "locationHint": "서초",
+      "category": "일식"
+    },
+    "호랑이초밥": {
+      "naver_map_url": "https://map.naver.com/p/search/호랑이초밥%20교대점",
+      "address": "서울 서초구 서초대로53길 7",
+      "representativeMenu": "서비스가 좋은 교대역 초밥",
+      "locationHint": "교대",
+      "category": "일식"
+    },
+    "미우야": {
+      "naver_map_url": "https://map.naver.com/p/search/미우야",
+      "address": "서울 서초구 강남대로39길 5",
+      "representativeMenu": "양재천 인근 소바 & 우동",
+      "locationHint": "양재",
+      "category": "일식"
+    },
+    "키누카누": {
+      "naver_map_url": "https://map.naver.com/p/search/키누카누%20강남점",
+      "address": "서울 서초구 서초대로77길 54",
+      "representativeMenu": "강남역 대형 스시 뷔페",
+      "locationHint": "강남",
+      "category": "일식"
+    },
+    "스시코우지": {
+      "naver_map_url": "https://map.naver.com/p/search/스시코우지",
+      "address": "서울 강남구 도산대로 318",
+      "representativeMenu": "하이엔드 스시 오마카세",
+      "locationHint": "청담",
+      "category": "일식"
+    },
+    "스시마이우": {
+      "naver_map_url": "https://map.naver.com/p/search/스시마이우%20강남역본점",
+      "address": "서울 서초구 서초대로77길 37",
+      "representativeMenu": "가성비 회전초밥 맛집",
+      "locationHint": "강남",
+      "category": "일식"
+    },
+    "갓덴스시": {
+      "naver_map_url": "https://map.naver.com/p/search/갓덴스시%20강남점",
+      "address": "서울 강남구 테헤란로 109",
+      "representativeMenu": "인기 회전초밥 체인",
+      "locationHint": "강남",
+      "category": "일식"
+    },
+    "은행골": {
+      "naver_map_url": "https://map.naver.com/p/search/은행골%20강남서초점",
+      "address": "서울 서초구 서초대로75길 34",
+      "representativeMenu": "해동이 잘 된 부드러운 초밥",
+      "locationHint": "강남",
+      "category": "일식"
+    },
+    "오레노라멘": {
+      "naver_map_url": "https://map.naver.com/p/search/오레노라멘%20강남점",
+      "address": "서울 강남구 테헤란로1길 28-9",
+      "representativeMenu": "닭육수 베이스의 토리파이탄",
+      "locationHint": "강남",
+      "category": "일식"
+    },
+    "왓쇼이켄": {
+      "naver_map_url": "https://map.naver.com/p/search/왓쇼이켄",
+      "address": "서울 강남구 테헤란로4길 46",
+      "representativeMenu": "강남역 인근 돈코츠 라멘",
+      "locationHint": "강남",
+      "category": "일식"
+    },
+    "유타로": {
+      "naver_map_url": "https://map.naver.com/p/search/유타로%20강남역점",
+      "address": "서울 서초구 서초대로74길 51",
+      "representativeMenu": "라멘과 오코노미야키 전문",
+      "locationHint": "서초",
+      "category": "일식"
+    },
+    "고에몬": {
+      "naver_map_url": "https://map.naver.com/p/search/고에몬%20강남역점",
+      "address": "서울 서초구 서초대로77길 7",
+      "representativeMenu": "수플레 오믈렛과 일본식 파스타",
+      "locationHint": "강남",
+      "category": "일식"
+    },
+    "토끼정": {
+      "naver_map_url": "https://map.naver.com/p/search/토끼정%20강남점",
+      "address": "서울 강남구 봉은사로6길 32",
+      "representativeMenu": "크림카레우동 맛집",
+      "locationHint": "강남",
+      "category": "일식"
+    },
+    "낙원테산도": {
+      "naver_map_url": "https://map.naver.com/p/search/낙원테산도%20강남본점",
+      "address": "서울 강남구 봉은사로4길 36",
+      "representativeMenu": "카츠산도와 오므라이스 전문",
+      "locationHint": "강남",
+      "category": "일식"
+    },
+    "카츠8": {
+      "naver_map_url": "https://map.naver.com/p/search/카츠8%20파르나스몰점",
+      "address": "서울 강남구 테헤란로 521",
+      "representativeMenu": "파르나스몰 프리미엄 카츠",
+      "locationHint": "삼성",
+      "category": "일식"
+    },
+    "마루심": {
+      "naver_map_url": "https://map.naver.com/p/search/마루심%20반포본점",
+      "address": "서울 서초구 고무래로10길 10",
+      "representativeMenu": "나고야식 히츠마부시 장어덮밥",
+      "locationHint": "반포",
+      "category": "일식"
+    },
+    "로리스 더 프라임 립": {
+      "naver_map_url": "https://map.naver.com/p/search/로리스더프라임립",
+      "address": "서울 서초구 서초대로 411",
+      "representativeMenu": "정통 프라임 립 스테이크",
+      "locationHint": "강남",
+      "category": "양식"
+    },
+    "라브리크": {
+      "naver_map_url": "https://map.naver.com/p/search/라브리크%20서울",
+      "address": "서울 강남구 봉은사로18길 88",
+      "representativeMenu": "테라스 뷰가 좋은 브런치",
+      "locationHint": "강남",
+      "category": "양식"
+    },
+    "다피타": {
+      "naver_map_url": "https://map.naver.com/p/search/다피타%202호점",
+      "address": "서울 서초구 잠원로 88",
+      "representativeMenu": "화덕피자와 파스타 전문",
+      "locationHint": "잠원",
+      "category": "양식"
+    },
+    "매드포갈릭": {
+      "naver_map_url": "https://map.naver.com/p/search/매드포갈릭%20예술의전당점",
+      "address": "서울 서초구 남부순환로 2406",
+      "representativeMenu": "마늘 요리 테마 이탈리안",
+      "locationHint": "예술의전당",
+      "category": "양식"
+    },
+    "바비레드": {
+      "naver_map_url": "https://map.naver.com/p/search/바비레드%20강남본점",
+      "address": "서울 강남구 봉은사로6길 39",
+      "representativeMenu": "매운 갈비 파스타 원조",
+      "locationHint": "강남",
+      "category": "양식"
+    },
+    "후추포인트": {
+      "naver_map_url": "https://map.naver.com/p/search/후추포인트%20강남점",
+      "address": "서울 강남구 봉은사로6길 30",
+      "representativeMenu": "트렌디한 뇨끼와 라자냐",
+      "locationHint": "강남",
+      "category": "양식"
+    },
+    "올리브에비뉴": {
+      "naver_map_url": "https://map.naver.com/p/search/올리브에비뉴",
+      "address": "서울 서초구 방배천로 11",
+      "representativeMenu": "사당역 파스텔시티 파스타",
+      "locationHint": "사당",
+      "category": "양식"
+    },
+    "더몰트하우스": {
+      "naver_map_url": "https://map.naver.com/p/search/더몰트하우스%20삼성점",
+      "address": "서울 강남구 테헤란로 626",
+      "representativeMenu": "분위기 좋은 다이닝 & 펍",
+      "locationHint": "삼성",
+      "category": "양식"
+    },
+    "푸슈": {
+      "naver_map_url": "https://map.naver.com/p/search/푸슈",
+      "address": "서울 서초구 방배로32길 9",
+      "representativeMenu": "라자냐 전문 프렌치 비스트로",
+      "locationHint": "내방",
+      "category": "양식"
+    },
+    "에이머": {
+      "naver_map_url": "https://map.naver.com/p/search/에이머%20교대",
+      "address": "서울 서초구 서초대로53길 21",
+      "representativeMenu": "들기름 파스타와 내추럴 와인",
+      "locationHint": "교대",
+      "category": "양식"
+    },
+    "마초쉐프": {
+      "naver_map_url": "https://map.naver.com/p/search/마초쉐프%20강남본점",
+      "address": "서울 강남구 강남대로98길 16",
+      "representativeMenu": "삼겹 스테이크와 화덕피자",
+      "locationHint": "강남",
+      "category": "양식"
+    },
+    "82올리언즈": {
+      "naver_map_url": "https://map.naver.com/p/search/82올리언즈%20강남",
+      "address": "서울 강남구 강남대로98길 28",
+      "representativeMenu": "미국 남부 가정식 스타일",
+      "locationHint": "강남",
+      "category": "양식"
+    },
+    "어거스트힐": {
+      "naver_map_url": "https://map.naver.com/p/search/어거스트힐%20강남점",
+      "address": "서울 강남구 강남대로106길 25",
+      "representativeMenu": "강남역 스테이크 하우스",
+      "locationHint": "강남",
+      "category": "양식"
+    },
+    "파스타트리오": {
+      "naver_map_url": "https://map.naver.com/p/search/파스타트리오%20강남역점",
+      "address": "서울 강남구 강남대로102길 13",
+      "representativeMenu": "트렌디한 파스타 전문점",
+      "locationHint": "강남",
+      "category": "양식"
+    },
+    "볼라레": {
+      "naver_map_url": "https://map.naver.com/p/search/볼라레",
+      "address": "서울 서초구 사평대로20길 8",
+      "representativeMenu": "나폴리 피자 인증 맛집",
+      "locationHint": "서래마을",
+      "category": "양식"
+    },
+    "텍사스 데 브라질": {
+      "naver_map_url": "https://map.naver.com/p/search/텍사스데브라질%20센트럴시티점",
+      "address": "서울 서초구 사평대로 205",
+      "representativeMenu": "슈하스코 무한리필 뷔페",
+      "locationHint": "센트럴시티",
+      "category": "양식"
+    },
+    "울프강 스테이크하우스": {
+      "naver_map_url": "https://map.naver.com/p/search/울프강스테이크하우스%20코리아",
+      "address": "서울 강남구 선릉로152길 21",
+      "representativeMenu": "뉴욕 정통 스테이크 하우스",
+      "locationHint": "청담",
+      "category": "양식"
+    },
+    "중화백반": {
+      "naver_map_url": "https://map.naver.com/p/search/중화백반",
+      "address": "서울 서초구 서초대로53길 19",
+      "representativeMenu": "불맛 나는 중화국밥 명가",
+      "locationHint": "교대",
+      "category": "중식"
+    },
+    "호경전": {
+      "naver_map_url": "https://map.naver.com/p/search/호경전%20신세계백화점%20강남점",
+      "address": "서울 서초구 신반포로 176",
+      "representativeMenu": "신세계백화점 프리미엄 중식",
+      "locationHint": "강남",
+      "category": "중식"
+    },
+    "차알": {
+      "naver_map_url": "https://map.naver.com/p/search/차알%20파미에스테이션점",
+      "address": "서울 서초구 사평대로 205",
+      "representativeMenu": "미국식 퓨전 중식",
+      "locationHint": "파미에",
+      "category": "중식"
+    },
+    "일일향": {
+      "naver_map_url": "https://map.naver.com/p/search/일일향%201호점",
+      "address": "서울 강남구 논현로 646",
+      "representativeMenu": "어향동고와 육즙 탕수육",
+      "locationHint": "논현",
+      "category": "중식"
+    },
+    "송쉐프": {
+      "naver_map_url": "https://map.naver.com/p/search/송쉐프%20신사본점",
+      "address": "서울 강남구 강남대로156길 39",
+      "representativeMenu": "옛날 볶음밥과 가라아게 탕수육",
+      "locationHint": "신사",
+      "category": "중식"
+    },
+    "몽중헌": {
+      "naver_map_url": "https://map.naver.com/p/search/몽중헌%20청담점",
+      "address": "서울 강남구 도산대로 445",
+      "representativeMenu": "딤섬과 중식 코스 요리",
+      "locationHint": "청담",
+      "category": "중식"
+    },
+    "무탄": {
+      "naver_map_url": "https://map.naver.com/p/search/무탄%20압구정본점",
+      "address": "서울 강남구 논현로176길 22",
+      "representativeMenu": "스테이크 트러플 짜장면 맛집",
+      "locationHint": "압구정",
+      "category": "중식"
+    },
+    "뽕사부": {
+      "naver_map_url": "https://map.naver.com/p/search/뽕사부%20교대점",
+      "address": "서울 서초구 서초대로53길 21",
+      "representativeMenu": "24시간 짬뽕 전문점",
+      "locationHint": "교대",
+      "category": "중식"
+    },
+    "JS가든": {
+      "naver_map_url": "https://map.naver.com/p/search/js가든%20압구정점",
+      "address": "서울 강남구 언주로174길 13",
+      "representativeMenu": "북경오리 전문 중식당",
+      "locationHint": "압구정",
+      "category": "중식"
+    },
+    "덕자네방앗간": {
+      "naver_map_url": "https://map.naver.com/p/search/덕자네방앗간%20본점",
+      "address": "서울 서초구 서초대로77길 62",
+      "representativeMenu": "수제 가래떡 떡볶이 맛집",
+      "locationHint": "강남",
+      "category": "분식"
+    },
+    "청담동마녀김밥": {
+      "naver_map_url": "https://map.naver.com/p/search/청담동마녀김밥%20청담점",
+      "address": "서울 강남구 압구정로79길 32",
+      "representativeMenu": "맛살 튀김이 들어간 이색 김밥",
+      "locationHint": "청담",
+      "category": "분식"
+    },
+    "서호김밥": {
+      "naver_map_url": "https://map.naver.com/p/search/서호김밥%20본점",
+      "address": "서울 서초구 방배로32길 97",
+      "representativeMenu": "방배동 카페골목 다시마 김밥",
+      "locationHint": "방배",
+      "category": "분식"
+    },
+    "방배김밥": {
+      "naver_map_url": "https://map.naver.com/p/search/방배김밥%20본점",
+      "address": "서울 동작구 동작대로27길 59-16",
+      "representativeMenu": "유부 김밥 생활의 달인",
+      "locationHint": "이수",
+      "category": "분식"
+    },
+    "고양이부엌": {
+      "naver_map_url": "https://map.naver.com/p/search/고양이부엌%20강남역점",
+      "address": "서울 서초구 강남대로61길 5-4",
+      "representativeMenu": "콩나물 즉석떡볶이 전문",
+      "locationHint": "강남",
+      "category": "분식"
+    },
+    "남도분식": {
+      "naver_map_url": "https://map.naver.com/p/search/남도분식%20강남점",
+      "address": "서울 강남구 봉은사로6길 38",
+      "representativeMenu": "이색적인 상추튀김과 분식",
+      "locationHint": "강남",
+      "category": "분식"
+    },
+    "루비떡볶이": {
+      "naver_map_url": "https://map.naver.com/p/search/루비떡볶이",
+      "address": "서울 강남구 선릉로153길 21",
+      "representativeMenu": "새우깡 떡볶이가 유명한 곳",
+      "locationHint": "압구정",
+      "category": "분식"
+    },
+    "미소의집": {
+      "naver_map_url": "https://map.naver.com/p/search/%EB%AF%B8%EC%86%8C%EC%9D%98%EC%A7%91/place/19877730?c=15.00,0,0,0,dh&placePath=/home?bk_query=%EB%AF%B8%EC%86%8C%EC%9D%98%EC%A7%91&entry=bmp&from=map&fromPanelNum=2&timestamp=202602121534&locale=ko&svcName=map_pcv5&searchText=%EB%AF%B8%EC%86%8C%EC%9D%98%EC%A7%91",
+      "address": "서울 서초구 신반포로 27-6",
+      "representativeMenu": "구반포 즉석떡볶이 노포",
+      "locationHint": "반포",
+      "category": "분식"
+    },
+    "또보겠지떡볶이": {
+      "naver_map_url": "https://map.naver.com/p/search/또보겠지떡볶이%20헬로몽키점",
+      "address": "서울 강남구 봉은사로6길 30",
+      "representativeMenu": "버터갈릭 감자튀김의 성지",
+      "locationHint": "강남",
+      "category": "분식"
+    },
+    "감성타코": {
+      "naver_map_url": "https://map.naver.com/p/search/감성타코%20강남역점",
+      "address": "서울 강남구 강남대로 406",
+      "representativeMenu": "푸짐한 파히타 플래터",
+      "locationHint": "강남",
+      "category": "멕시칸"
+    },
+    "낙원타코": {
+      "naver_map_url": "https://map.naver.com/p/search/낙원타코%20강남역점",
+      "address": "서울 서초구 서초대로73길 9",
+      "representativeMenu": "대창 파히타 유명 맛집",
+      "locationHint": "강남",
+      "category": "멕시칸"
+    },
+    "도스타코스": {
+      "naver_map_url": "https://map.naver.com/p/search/도스타코스%20강남역점",
+      "address": "서울 서초구 강남대로 455",
+      "representativeMenu": "정통 멕시칸 캐주얼 다이닝",
+      "locationHint": "강남",
+      "category": "멕시칸"
+    },
+    "바토스": {
+      "naver_map_url": "https://map.naver.com/p/search/바토스%20파르나스몰점",
+      "address": "서울 강남구 테헤란로 521",
+      "representativeMenu": "김치 프라이즈와 이색 타코",
+      "locationHint": "삼성",
+      "category": "멕시칸"
+    },
+    "슈가스컬": {
+      "naver_map_url": "https://map.naver.com/p/search/슈가스컬%20센트럴시티점",
+      "address": "서울 서초구 사평대로 205",
+      "representativeMenu": "화려한 멕시칸 펍 다이닝",
+      "locationHint": "파미에",
+      "category": "멕시칸"
+    },
+    "쿠차라": {
+      "naver_map_url": "https://map.naver.com/p/search/쿠차라%20삼성서초사옥점",
+      "address": "서울 서초구 서초대로74길 11",
+      "representativeMenu": "커스텀 가능한 브리또 볼",
+      "locationHint": "서초",
+      "category": "멕시칸"
+    },
+    "온더보더": {
+      "naver_map_url": "https://map.naver.com/p/search/온더보더%20삼성타운점",
+      "address": "서울 강남구 테헤란로87길 22",
+      "representativeMenu": "멕시칸 패밀리 레스토랑",
+      "locationHint": "삼성",
+      "category": "멕시칸"
+    },
+    "갓잇": {
+      "naver_map_url": "https://map.naver.com/p/search/갓잇%20도산공원점",
+      "address": "서울 강남구 언주로164길 24",
+      "representativeMenu": "플레이팅이 예쁜 타코 맛집",
+      "locationHint": "도산",
+      "category": "멕시칸"
+    },
+    "비야게레로": {
+      "naver_map_url": "https://map.naver.com/p/search/비야게레로",
+      "address": "서울 강남구 봉은사로78길 12",
+      "representativeMenu": "현지 느낌 물씬 풍기는 타코",
+      "locationHint": "삼성",
+      "category": "멕시칸"
+    },
+    "훌리오": {
+      "naver_map_url": "https://map.naver.com/p/search/훌리오%20강남점",
+      "address": "서울 강남구 강남대로102길 22",
+      "representativeMenu": "강남역 인기 멕시칸 요리",
+      "locationHint": "강남",
+      "category": "멕시칸"
+    },
+    "카페마마스": {
+      "naver_map_url": "https://map.naver.com/p/search/카페마마스%20강남역점",
+      "address": "서울 서초구 서초대로74길 11",
+      "representativeMenu": "리코타 치즈 샐러드와 파니니",
+      "locationHint": "서초",
+      "category": "브런치"
+    },
+    "피그인더가든": {
+      "naver_map_url": "https://map.naver.com/p/search/피그인더가든%20강남점",
+      "address": "서울 강남구 강남대로 358",
+      "representativeMenu": "프리미엄 보울 샐러드",
+      "locationHint": "강남",
+      "category": "브런치"
+    },
+    "알라보": {
+      "naver_map_url": "https://map.naver.com/p/search/알라보%20강남N타워점",
+      "address": "서울 강남구 테헤란로 129",
+      "representativeMenu": "아보카도 슈퍼푸드 볼",
+      "locationHint": "강남",
+      "category": "브런치"
+    },
+    "노티드": {
+      "naver_map_url": "https://map.naver.com/p/search/노티드%20청담",
+      "address": "서울 강남구 도산대로53길 15",
+      "representativeMenu": "우유 생크림 도넛의 원조",
+      "locationHint": "청담",
+      "category": "디저트"
+    },
+    "런던베이글뮤지엄": {
+      "naver_map_url": "https://map.naver.com/p/search/런던베이글뮤지엄%20도산점",
+      "address": "서울 강남구 언주로168길 33",
+      "representativeMenu": "도산공원 핫플 베이글",
+      "locationHint": "도산",
+      "category": "디저트"
+    },
+    "아티제": {
+      "naver_map_url": "https://map.naver.com/p/search/아티제%20삼성타운점",
+      "address": "서울 서초구 서초대로74길 11",
+      "representativeMenu": "얼그레이 쉬폰 케이크 추천",
+      "locationHint": "서초",
+      "category": "디저트"
+    },
+    "장꼬방": {
+      "naver_map_url": "https://map.naver.com/p/search/장꼬방",
+      "address": "서울 서초구 강남대로61길 27",
+      "representativeMenu": "가마솥 팥빙수와 찹쌀떡",
+      "locationHint": "강남",
+      "category": "디저트"
+    },
+    "태극당": {
+      "naver_map_url": "https://map.naver.com/p/search/태극당%20강남역점",
+      "address": "서울 강남구 강남대로 358",
+      "representativeMenu": "역사 깊은 모나카 아이스크림",
+      "locationHint": "강남",
+      "category": "디저트"
+    },
+    "카멜커피": {
+      "naver_map_url": "https://map.naver.com/p/search/카멜커피%20도산점",
+      "address": "서울 강남구 도산대로45길 16-8",
+      "representativeMenu": "카멜커피와 앙버터 맛집",
+      "locationHint": "도산",
+      "category": "디저트"
+    },
+    "누데이크": {
+      "naver_map_url": "https://map.naver.com/p/search/누데이크%20하우스도산",
+      "address": "서울 강남구 압구정로46길 50",
+      "representativeMenu": "독특한 디자인의 peak 케이크",
+      "locationHint": "도산",
+      "category": "디저트"
+    }
+  }
+}

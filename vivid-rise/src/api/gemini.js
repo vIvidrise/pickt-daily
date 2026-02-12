@@ -1,6 +1,7 @@
 // src/api/gemini.js
 
 import { places as placesList } from '../data/places';
+import restaurantLinksFromXlsx from '../data/restaurantLinksFromXlsx.json';
 
 // 1. 구글 시트 (맛집 데이터) — 여러 탭 gid 로드 후 병합, 모든 주소로 '네이버에서 보기' 연결
 const GOOGLE_SHEET_BASE = 'https://docs.google.com/spreadsheets/d/1C4y3wbFKCYkqHy4ZDhH7AddsTRc3X431mMl6816r9Lw/export?format=csv&gid=';
@@ -192,6 +193,14 @@ let CACHED_DB_TIMESTAMP = 0;
 /** 시트에서 로드한 장소별 상세 (주소, 대표메뉴, naver_map_url) — 키: `${regionKey}|${name}` */
 let CACHED_PLACE_DETAILS = null;
 
+function getXlsxLink(name) {
+  const key = (name && String(name).trim()) || '';
+  if (!key) return null;
+  const rec = restaurantLinksFromXlsx?.byName?.[key];
+  if (!rec?.naver_map_url) return null;
+  return rec;
+}
+
 /** 지역/위치 문자열 → 앱 지역키 매핑 (강남·서초 / 용산·이태원 / …) */
 function locationToRegionKey(locationHint) {
   if (!locationHint || typeof locationHint !== 'string') return '강남·서초';
@@ -267,6 +276,11 @@ function mergeSheetIntoDb(text, db, placeDetails) {
     const detail = { address, representativeMenu };
     if (naverMapUrl && naverMapUrl.length > 10 && /naver\.com/.test(naverMapUrl)) {
       detail.naver_map_url = naverMapUrl;
+    }
+    // 시트에 F열이 비어 있으면, 로컬 엑셀(restaurant_data.xlsx)의 F열 링크를 폴백으로 사용
+    if (!detail.naver_map_url) {
+      const xlsx = getXlsxLink(name);
+      if (xlsx?.naver_map_url) detail.naver_map_url = xlsx.naver_map_url;
     }
     placeDetails[key] = detail;
   });
@@ -498,6 +512,9 @@ export async function fetchRecommendations(params) {
     const picked = getRandomPlacesFromData(regionKey, category);
     const results = picked.map((p, index) => {
       const offset = () => (Math.random() - 0.5) * 0.008;
+      const xlsx = getXlsxLink(p.name);
+      const xlsxUrl = xlsx?.naver_map_url || '';
+      const xlsxAddress = xlsx?.address || '';
       return {
         id: p.id,
         name: p.name,
@@ -508,10 +525,10 @@ export async function fetchRecommendations(params) {
         status: Math.random() > 0.4 ? "웨이팅 있음" : "입장 가능",
         statusColor: "green",
         notice: NOTICES[Math.floor(Math.random() * NOTICES.length)],
-        naverUrl: p.naver_map_url || '',
-        naver_map_url: p.naver_map_url || '',
+        naverUrl: xlsxUrl || p.naver_map_url || '',
+        naver_map_url: xlsxUrl || p.naver_map_url || '',
         hours: "11:00 - 22:00",
-        address: p.address || '',
+        address: p.address || xlsxAddress || '',
         time: ["12:00", "15:00", "18:00"][index],
         tag: p.category,
         representativeMenu: p.description || '',
@@ -539,13 +556,17 @@ export async function fetchRecommendations(params) {
   const results = placeNames.slice(0, 3).map((name, index) => {
     const coords = getPlaceCoords(name, regionKey, regionData);
     const details = getPlaceDetails(regionKey, name);
+    const xlsx = getXlsxLink(name);
     const address = (details?.address && details.address.trim()) ? details.address : coords.address;
     const representativeMenuStr = (details?.representativeMenu && details.representativeMenu.trim())
       ? details.representativeMenu
       : (mode === 'eat' ? pickRepresentativeMenu(category) : '');
     const sheetNaverUrl = details?.naver_map_url?.trim();
+    const xlsxUrl = xlsx?.naver_map_url?.trim();
     const naverUrl = (sheetNaverUrl && sheetNaverUrl.length > 10 && sheetNaverUrl.includes('naver.com'))
       ? sheetNaverUrl
+      : (xlsxUrl && xlsxUrl.length > 10 && xlsxUrl.includes('naver.com'))
+        ? xlsxUrl
       : buildNaverPlaceUrl(name, regionKey, address);
 
     const isWaiting = Math.random() > 0.4;
@@ -643,8 +664,11 @@ export async function fetchLuckyPlacesNearby(params) {
     const details = getPlaceDetails(regionKey, name);
     const address = details?.address?.trim() || '';
     const sheetNaverUrl = details?.naver_map_url?.trim();
+    const xlsxUrl = getXlsxLink(name)?.naver_map_url?.trim();
     const naverUrl = (sheetNaverUrl && sheetNaverUrl.length > 10 && sheetNaverUrl.includes('naver.com'))
       ? sheetNaverUrl
+      : (xlsxUrl && xlsxUrl.length > 10 && xlsxUrl.includes('naver.com'))
+        ? xlsxUrl
       : buildNaverPlaceUrl(name, regionKey, address);
     const placeLat = centerLat + getOffset();
     const placeLng = centerLng + getOffset();
@@ -695,8 +719,11 @@ export async function fetchNearbyRecommendation(params) {
   const details = getPlaceDetails(regionKey, name);
   const address = details?.address?.trim() || '';
   const sheetNaverUrl = details?.naver_map_url?.trim();
+  const xlsxUrl = getXlsxLink(name)?.naver_map_url?.trim();
   const naverUrl = (sheetNaverUrl && sheetNaverUrl.length > 10 && sheetNaverUrl.includes('naver.com'))
     ? sheetNaverUrl
+    : (xlsxUrl && xlsxUrl.length > 10 && xlsxUrl.includes('naver.com'))
+      ? xlsxUrl
     : buildNaverPlaceUrl(name, regionKey, address);
   return new Promise((resolve) => {
     setTimeout(
