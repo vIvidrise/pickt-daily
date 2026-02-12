@@ -1,6 +1,6 @@
 // src/api/gemini.js
 
-import { places as placesList } from '../data/places';
+import { places as placesList, DEFAULT_PLACE_IMAGE } from '../data/places';
 import restaurantLinksFromXlsx from '../data/restaurantLinksFromXlsx.json';
 import { recommendEatPlaces } from '../utils/recommendEat.js';
 
@@ -506,6 +506,7 @@ export async function fetchRecommendations(params) {
   console.log(`🔎 검색: [${regionKey}] 지역의 [${category}] (${mode})`);
 
   // 오늘 뭐 먹지: places.ts(엑셀) 기반으로 [카테고리+지역] 필터 후, [분위기/시설] 가산점으로 상위 3개 추천
+  // 지도 표시를 위해 오늘 뭐 하지와 동일하게 getPlaceCoords로 지역 기준 좌표 부여
   if (mode === 'eat' && placesList && placesList.length > 0) {
     const facilityRaw = params?.facility;
     const facilities =
@@ -525,8 +526,15 @@ export async function fetchRecommendations(params) {
     });
 
     const picked = rec.items || [];
+    const db = await getDatabase();
+    const regionData = db[regionKey] || db['강남·서초'];
+
     const results = picked.map((p, index) => {
       const xlsx = getXlsxLink(p.name);
+      const coords = getPlaceCoords(p.name, regionKey, regionData);
+      const hasValidCoords = p.lat != null && p.lng != null && !(Number(p.lat) === 0 && Number(p.lng) === 0);
+      const lat = hasValidCoords ? p.lat : coords.lat;
+      const lng = hasValidCoords ? p.lng : coords.lng;
       // "네이버에서 보기"는 places.ts의 naver_map_url(엑셀 F열)을 최우선으로 사용
       const naver_map_url = (p.naver_map_url || '').trim();
       const naverUrl = naver_map_url;
@@ -534,8 +542,8 @@ export async function fetchRecommendations(params) {
         id: p.id,
         name: p.name,
         description: p.description || `${p.category} 맛집`,
-        lat: p.lat,
-        lng: p.lng,
+        lat,
+        lng,
         emoji: getCategoryEmoji(p.category),
         status: Math.random() > 0.4 ? "웨이팅 있음" : "입장 가능",
         statusColor: "green",
@@ -543,7 +551,7 @@ export async function fetchRecommendations(params) {
         naverUrl,
         naver_map_url,
         hours: "11:00 - 22:00",
-        address: p.address || xlsx?.address || '',
+        address: p.address || xlsx?.address || coords.address || '',
         time: ["12:00", "15:00", "18:00"][index],
         tag: p.category,
         representativeMenu: p.description || '',
@@ -703,7 +711,7 @@ export async function fetchLuckyPlacesNearby(params) {
       solo_difficulty_level,
       naverUrl,
       emoji: getCategoryEmoji(category),
-      imageUrl: PLACE_IMAGE_URLS[name] || DEFAULT_PLACE_IMAGE_URL,
+      imageUrl: PLACE_IMAGE_URLS[name] || DEFAULT_PLACE_IMAGE,
     };
   });
 
@@ -750,7 +758,7 @@ export async function fetchNearbyRecommendation(params) {
           naverUrl,
           address,
           solo_difficulty_level: 1,
-          imageUrl: PLACE_IMAGE_URLS[name] || DEFAULT_PLACE_IMAGE_URL,
+          imageUrl: PLACE_IMAGE_URLS[name] || DEFAULT_PLACE_IMAGE,
         }),
       400
     );

@@ -1,3 +1,6 @@
+/** 엑셀/데이터에 이미지가 없을 때 사용할 기본 이미지 경로 */
+export const DEFAULT_PLACE_IMAGE = "/images/place_default.png";
+
 export interface Place {
   id: number;
   name: string;
@@ -6,7 +9,8 @@ export interface Place {
   address: string;
   description: string;
   naver_map_url: string;
-  image_url: string;
+  /** 없으면 DEFAULT_PLACE_IMAGE 또는 회색 박스로 대체 */
+  image_url?: string;
   lat: number;
   lng: number;
 }

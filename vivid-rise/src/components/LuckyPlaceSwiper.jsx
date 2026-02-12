@@ -6,7 +6,7 @@ import { useState } from "react";
 import { openNaverMapSearch, openNaverMapPlaceUrl } from "../utils/naverMapScheme.js";
 import "./LuckyPlaceSwiper.css";
 
-const FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=200&h=200&fit=crop';
+import { DEFAULT_PLACE_IMAGE } from "../data/places";
 
 export function LuckyPlaceSwiper({ places = [], emptyMessage = "위치를 허용하면 근처 행운 장소를 추천해 드려요." }) {
   if (places.length === 0) {
@@ -16,14 +16,14 @@ export function LuckyPlaceSwiper({ places = [], emptyMessage = "위치를 허용
   return (
     <div className="lucky-place-list-wrap">
       {places.map((place, i) => (
-        <LuckyPlaceCard key={`${place.name}-${i}`} place={place} fallbackImage={FALLBACK_IMAGE} />
+        <LuckyPlaceCard key={`${place.name}-${i}`} place={place} fallbackImage={DEFAULT_PLACE_IMAGE} />
       ))}
     </div>
   );
 }
 
 function LuckyPlaceCard({ place, fallbackImage }) {
-  const [imgSrc, setImgSrc] = useState(place.imageUrl || fallbackImage);
+  const [imgSrc, setImgSrc] = useState(place.imageUrl || place.image_url || fallbackImage);
 
   const handleImageError = () => {
     setImgSrc(fallbackImage);
@@ -48,8 +48,10 @@ function LuckyPlaceCard({ place, fallbackImage }) {
           <span className="lucky-place-emoji">{place.emoji || "🍽️"}</span>
           <div className="lucky-place-info">
             <p className="lucky-place-name">{place.name}</p>
-            <span className="lucky-place-distance">{place.distanceText}</span>
-            <span className="lucky-place-level">혼밥 {place.solo_difficulty_level}단계</span>
+            {place.distanceText != null && place.distanceText !== '' && (
+              <span className="lucky-place-distance">{place.distanceText}</span>
+            )}
+            <span className="lucky-place-level">혼밥 {place.solo_difficulty_level ?? 1}단계</span>
           </div>
         </div>
         <div className="lucky-place-card-thumb">

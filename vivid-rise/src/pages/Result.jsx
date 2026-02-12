@@ -48,9 +48,46 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
 });
 
-/** 길찾기 버튼 노출 여부 (lat, lng 있으면 표시) */
+// 지도/길찾기용 폴백: 좌표가 0이거나 없을 때 서울 시청
+const FALLBACK_MAP_CENTER = { lat: 37.5665, lng: 126.978 };
+
+/** 오늘 뭐 먹지: API가 (0,0)만 줄 때 지도가 보이도록 지역별 중심 좌표 (gemini getPlaceCoords와 동일) */
+const REGION_CENTERS = {
+  '강남·서초': { lat: 37.498, lng: 127.0277 },
+  '용산·이태원': { lat: 37.534, lng: 126.994 },
+  '종로·을지로': { lat: 37.5704, lng: 126.9922 },
+  '성수·건대': { lat: 37.5445, lng: 127.0559 },
+  '홍대·연남': { lat: 37.5567, lng: 126.9237 },
+  '잠실·송파': { lat: 37.5133, lng: 127.1025 },
+  '성남·분당': { lat: 37.3829, lng: 127.1214 },
+  '수원': { lat: 37.2636, lng: 127.0286 },
+  '인천': { lat: 37.4563, lng: 126.7052 },
+};
+
+function isInvalidCoord(lat, lng) {
+  const la = Number(lat);
+  const ln = Number(lng);
+  return !Number.isFinite(la) || !Number.isFinite(ln) || (la === 0 && ln === 0);
+}
+
+/** 오늘 뭐 먹지 리스트에 유효한 좌표가 하나도 없으면 지역 중심 + 오프셋으로 채움 (지도 표시용) */
+function ensureEatModeCoords(items, regionKey) {
+  if (!items?.length) return items;
+  const allInvalid = items.every((p) => isInvalidCoord(p.lat, p.lng ?? p.left));
+  if (!allInvalid) return items;
+  const center = REGION_CENTERS[regionKey] || REGION_CENTERS['강남·서초'] || FALLBACK_MAP_CENTER;
+  const getOffset = () => (Math.random() - 0.5) * 0.005;
+  return items.map((p, i) => ({
+    ...p,
+    lat: center.lat + getOffset() + i * 0.001,
+    lng: center.lng + getOffset() + i * 0.001,
+  }));
+}
+
+/** 길찾기 버튼 노출 여부 (lat, lng 유효할 때만 — 0,0은 무효) */
 function hasRouteData(lat, lng) {
-  return lat != null && lng != null;
+  if (lat == null || lng == null) return false;
+  return !(Number(lat) === 0 && Number(lng) === 0);
 }
 
 export default function Result() {
@@ -151,9 +188,11 @@ export default function Result() {
           setLoading(false);
           return;
         }
-        // eat 모드: places.ts의 naver_map_url을 그대로 사용해야 하므로 링크를 덮어쓰지 않음
+        // eat 모드: 오늘 뭐 하지처럼 지도에 표시되도록 좌표 보정 후 설정
         if (searchParams.mode !== 'do') {
-          setList(data);
+          const regionKey = searchParams.region || '강남·서초';
+          const listWithCoords = ensureEatModeCoords(data, regionKey);
+          setList(listWithCoords);
           setLoading(false);
           return;
         }
@@ -196,6 +235,7 @@ export default function Result() {
 
     let cancelled = false;
     let authErrorTimer = null;
+    let tileFallbackTimer = null;
     // 공식 문서: Open API 인증 실패 시 전역 함수가 호출됨
     // https://navermaps.github.io/maps.js.ncp/docs/tutorial-2-Getting-Started.html
     const prevAuthFailure = window.navermap_authFailure;
@@ -267,13 +307,8 @@ export default function Result() {
             const lng = Number(p?.lng ?? p?.left);
             return Number.isFinite(lat) && Number.isFinite(lng) && lat !== 0 && lng !== 0;
           });
-          if (!first) {
-            if (!cancelled) setMapError(true);
-            return;
-          }
-
-          const centerLat = Number(first.lat);
-          const centerLng = Number(first.lng ?? first.left);
+          const centerLat = first ? Number(first.lat) : FALLBACK_MAP_CENTER.lat;
+          const centerLng = first ? Number(first.lng ?? first.left) : FALLBACK_MAP_CENTER.lng;
 
           const map = new naver.maps.Map(mapElement.current, {
             center: new naver.maps.LatLng(centerLat, centerLng),
@@ -282,10 +317,25 @@ export default function Result() {
           });
           naverMapRef.current = map;
 
+          // 타일이 로드되지 않으면(파란 화면만 나오는 경우) 일정 시간 후 Leaflet으로 전환
+          let tileLoadResolved = false;
+          tileFallbackTimer = setTimeout(() => {
+            if (cancelled || tileLoadResolved) return;
+            console.warn("네이버 지도 타일 미로드(파란 화면) 감지 → Leaflet으로 전환. NCP 웹 서비스 URL에 현재 도메인 등록을 확인하세요.");
+            setMapError(true);
+          }, 5000);
+          if (naver.maps.Event && typeof map.addListener === 'function') {
+            naver.maps.Event.addListener(map, 'idle', () => {
+              tileLoadResolved = true;
+              clearTimeout(tileFallbackTimer);
+            });
+          }
+
           const markers = [];
           resolvedList.forEach((item) => {
-            const lng = item.lng ?? item.left;
-            if (item.lat == null || lng == null) return;
+            const itemLat = Number(item.lat);
+            const itemLng = Number(item.lng ?? item.left);
+            if (!Number.isFinite(itemLat) || !Number.isFinite(itemLng) || (itemLat === 0 && itemLng === 0)) return;
 
             const emoji = getPinEmoji(item);
             const levelStyle = !isDoMode ? getPinLevelStyle(item.solo_difficulty_level) : 'background-color:#F04452;box-shadow:0 4px 10px rgba(240,68,82,0.4);border:3px solid white;';
@@ -298,7 +348,7 @@ export default function Result() {
               </div>`;
 
             const marker = new naver.maps.Marker({
-              position: new naver.maps.LatLng(item.lat, lng),
+              position: new naver.maps.LatLng(itemLat, itemLng),
               map: map,
               icon: { content: contentHtml, size: new naver.maps.Size(40, 40), anchor: new naver.maps.Point(20, 42) }
             });
@@ -317,11 +367,16 @@ export default function Result() {
             });
             markers.push(marker);
           });
-          // 추천 장소 전체가 보이도록 지도 영역 맞춤 (앱인토스 지도 연동)
-          if (markers.length > 0) {
+          // 추천 장소 전체가 보이도록 지도 영역 맞춤 (앱인토스 지도 연동). (0,0) 좌표 제외
+          const validForBounds = resolvedList.filter((i) => {
+            const la = Number(i.lat);
+            const ln = Number(i.lng ?? i.left);
+            return Number.isFinite(la) && Number.isFinite(ln) && (la !== 0 || ln !== 0);
+          });
+          if (markers.length > 0 && validForBounds.length > 0) {
             const bounds = new naver.maps.LatLngBounds(
-              new naver.maps.LatLng(Math.min(...resolvedList.map((i) => i.lat).filter(Number.isFinite)) - 0.005, Math.min(...resolvedList.map((i) => i.lng ?? i.left).filter(Number.isFinite)) - 0.005),
-              new naver.maps.LatLng(Math.max(...resolvedList.map((i) => i.lat).filter(Number.isFinite)) + 0.005, Math.max(...resolvedList.map((i) => i.lng ?? i.left).filter(Number.isFinite)) + 0.005)
+              new naver.maps.LatLng(Math.min(...validForBounds.map((i) => Number(i.lat))) - 0.005, Math.min(...validForBounds.map((i) => Number(i.lng ?? i.left))) - 0.005),
+              new naver.maps.LatLng(Math.max(...validForBounds.map((i) => Number(i.lat))) + 0.005, Math.max(...validForBounds.map((i) => Number(i.lng ?? i.left))) + 0.005)
             );
             naverMapBoundsRef.current = bounds;
             try {
@@ -362,6 +417,7 @@ export default function Result() {
     return () => {
       cancelled = true;
       if (authErrorTimer) clearTimeout(authErrorTimer);
+      if (tileFallbackTimer) clearTimeout(tileFallbackTimer);
       window.navermap_authFailure = prevAuthFailure;
       naverMapRef.current = null;
       naverMapBoundsRef.current = null;
@@ -387,9 +443,13 @@ export default function Result() {
   // 네이버 지도 실패 시 Leaflet(OpenStreetMap)으로 표시 — API 키/URL 등록 불필요
   useEffect(() => {
     if (!mapError || list.length === 0 || !leafletMapRef.current) return;
-    const centerLat = list[0].lat;
-    const centerLng = list[0].lng ?? list[0].left;
-    if (centerLat == null || centerLng == null) return;
+    let centerLat = list[0].lat;
+    let centerLng = list[0].lng ?? list[0].left;
+    const invalid = centerLat == null || centerLng == null || (Number(centerLat) === 0 && Number(centerLng) === 0);
+    if (invalid) {
+      centerLat = FALLBACK_MAP_CENTER.lat;
+      centerLng = FALLBACK_MAP_CENTER.lng;
+    }
 
     const map = L.map(leafletMapRef.current).setView([centerLat, centerLng], 15);
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
@@ -398,8 +458,9 @@ export default function Result() {
 
     const markers = [];
     list.forEach((item, index) => {
-      const lng = item.lng ?? item.left;
-      if (item.lat == null || lng == null) return;
+      const lat = Number(item.lat);
+      const lng = Number(item.lng ?? item.left);
+      if (!Number.isFinite(lat) || !Number.isFinite(lng) || (lat === 0 && lng === 0)) return;
       const emoji = getPinEmoji(item);
       const levelClass = !isDoMode ? getPinLevelClass(item.solo_difficulty_level) : '';
       const pinHtml = `
@@ -415,11 +476,11 @@ export default function Result() {
         iconSize: [40, 52],
         iconAnchor: [20, 52],
       });
-      const marker = L.marker([item.lat, lng], { icon }).addTo(map);
+      const marker = L.marker([lat, lng], { icon }).addTo(map);
       marker.on("click", () => {
         setShowCourseList(false);
         setSelectedPlace(item);
-        map.panTo([item.lat, lng]);
+        map.panTo([lat, lng]);
       });
       markers.push(marker);
     });
@@ -545,7 +606,7 @@ export default function Result() {
           <div className="overlay" onClick={() => setSelectedPlace(null)}></div>
           <div className="toss-bottom-sheet slide-up">
             <div className="sheet-top-row">
-              <div className="place-img-box">{selectedPlace.emoji}</div>
+              <div className="place-img-box">{selectedPlace.emoji ?? "📍"}</div>
               <div className="place-info-col">
                 <div className="place-title-row">
                   <span className="place-title">{selectedPlace.name}</span>
@@ -557,8 +618,8 @@ export default function Result() {
                   </div>
                 </div>
                 <div className="place-badge-row">
-                  <span className={`status-badge ${selectedPlace.statusColor}`}>
-                    {selectedPlace.status}
+                  <span className={`status-badge ${selectedPlace.statusColor ?? "green"}`}>
+                    {selectedPlace.status ?? "영업 중"}
                   </span>
                   <span className="update-text">• 실시간 정보</span>
                 </div>
@@ -566,10 +627,10 @@ export default function Result() {
               <button className="close-btn-absolute" onClick={() => setSelectedPlace(null)} style={{border:'none', background:'none', fontSize:'18px'}}>✖️</button>
             </div>
 
-            {selectedPlace.representativeMenu && (
+            {(selectedPlace.representativeMenu ?? selectedPlace.category) && (
               <div className="representative-menu-box">
                 <span className="rep-menu-label">대표 메뉴</span>
-                <span className="rep-menu-value">{selectedPlace.representativeMenu}</span>
+                <span className="rep-menu-value">{selectedPlace.representativeMenu ?? selectedPlace.category ?? ""}</span>
               </div>
             )}
 
@@ -581,7 +642,7 @@ export default function Result() {
             )}
 
             <div className="notice-box">
-              <p className="notice-text">{selectedPlace.notice}</p>
+              <p className="notice-text">{selectedPlace.notice ?? selectedPlace.description ?? ""}</p>
             </div>
 
             <div className="sheet-map-actions">
