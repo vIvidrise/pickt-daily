@@ -183,6 +183,13 @@ export default function Result() {
 
     let cancelled = false;
     let authErrorTimer = null;
+    // 공식 문서: Open API 인증 실패 시 전역 함수가 호출됨
+    // https://navermaps.github.io/maps.js.ncp/docs/tutorial-2-Getting-Started.html
+    const prevAuthFailure = window.navermap_authFailure;
+    window.navermap_authFailure = function () {
+      console.warn("네이버 지도 Open API 인증 실패(navermap_authFailure) → Leaflet으로 전환");
+      if (!cancelled) setMapError(true);
+    };
 
     loadNaverMapScript()
       .then((naver) => {
@@ -275,6 +282,7 @@ export default function Result() {
     return () => {
       cancelled = true;
       if (authErrorTimer) clearTimeout(authErrorTimer);
+      window.navermap_authFailure = prevAuthFailure;
     };
   }, [loading, list, isDoMode]);
 
